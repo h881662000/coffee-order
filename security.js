@@ -4,7 +4,7 @@
 const SECURITY_CONFIG = {
     // 訂單頻率限制
     ORDER_RATE_LIMIT: {
-        maxOrders: 3,              // 最大訂單數
+        maxOrders: 999,              // 最大訂單數
         timeWindow: 3600000,       // 時間窗口（1小時，毫秒）
         blockDuration: 86400000    // 封鎖時長（24小時，毫秒）
     },
