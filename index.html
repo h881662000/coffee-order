@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咖啡熟豆訂購平台</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-extended.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>☕ 咖啡熟豆訂購平台</h1>
+            <nav class="header-nav">
+                <button onclick="showOrderSearchModal()" class="nav-btn">訂單查詢</button>
+                <button onclick="showMyOrders()" class="nav-btn">我的訂單</button>
+                <div id="member-area" class="member-area"></div>
+                <div class="cart-icon" onclick="toggleCart()">
+                    🛒 購物車 (<span id="cart-count">0</span>)
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 推薦商品區 -->
+        <section id="home-recommendations" class="recommendations">
+            <!-- 推薦商品會由 JavaScript 動態生成 -->
+        </section>
+
+        <section class="products">
+            <h2>精選咖啡豆</h2>
+            <div class="product-grid" id="product-grid">
+                <!-- 產品會由 JavaScript 動態生成 -->
+            </div>
+        </section>
+    </main>
+
+    <!-- 購物車側邊欄 -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>購物車</h2>
+            <button class="close-btn" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- 購物車項目 -->
+        </div>
+
+        <!-- 購物車推薦 -->
+        <div id="cart-recommendations" style="display:none;"></div>
+
+        <!-- 優惠券區 -->
+        <div class="cart-coupon">
+            <input type="text" id="coupon-code" placeholder="輸入優惠券代碼">
+            <button onclick="applyCoupon()" class="apply-coupon-btn">套用</button>
+            <button onclick="showAvailableCoupons()" class="view-coupons-btn">查看優惠券</button>
+        </div>
+
+        <div class="cart-footer">
+            <div id="order-price-summary" class="price-summary">
+                <div class="price-row">
+                    <span>總計：</span>
+                    <span id="cart-total">NT$ 0</span>
+                </div>
+            </div>
+            <button class="checkout-btn" onclick="showCheckoutForm()">結帳</button>
+        </div>
+    </div>
+
+    <!-- 結帳表單遮罩 -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>填寫訂購資訊</h2>
+                <button class="close-btn" onclick="closeCheckoutForm()">✕</button>
+            </div>
+            <form id="checkout-form" onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label for="customer-name">姓名 *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">電話 *</label>
+                    <input type="tel" id="customer-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-email">Email</label>
+                    <input type="email" id="customer-email">
+                </div>
+                <div class="form-group">
+                    <label for="customer-address">地址 *</label>
+                    <textarea id="customer-address" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="customer-note">備註</label>
+                    <textarea id="customer-note" rows="2"></textarea>
+                </div>
+
+                <!-- 付款方式選擇 -->
+                <div class="form-group">
+                    <label>付款方式 *</label>
+                    <div id="payment-methods"></div>
+                </div>
+
+                <!-- 驗證碼 -->
+                <div class="form-group captcha-group">
+                    <label>安全驗證 *</label>
+                    <div class="captcha-container">
+                        <div class="captcha-question" id="captcha-question">載入中...</div>
+                        <input type="number" id="captcha-answer" placeholder="請輸入答案" required>
+                        <button type="button" onclick="refreshCaptcha()" class="captcha-refresh">🔄 重新整理</button>
+                    </div>
+                    <p class="captcha-hint">請計算上方算式以驗證您不是機器人</p>
+                </div>
+
+                <div class="order-summary">
+                    <h3>訂單明細</h3>
+                    <div id="order-summary-items"></div>
+                    <div class="order-total">
+                        <strong>總金額：<span id="order-total">NT$ 0</span></strong>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">送出訂單</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 訂單完成訊息 -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content success-content">
+            <div class="success-icon">✓</div>
+            <h2>訂單已送出！</h2>
+            <p>我們已收到您的訂單，將盡快與您聯繫確認。</p>
+            <p class="order-number">訂單編號：<span id="order-number"></span></p>
+            <button class="submit-btn" onclick="closeSuccessModal()">返回首頁</button>
+        </div>
+    </div>
+
+    <!-- 會員登入 -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>會員登入</h2>
+                <button class="close-btn" onclick="closeLoginModal()">✕</button>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-phone">電話</label>
+                    <input type="tel" id="login-phone" required>
+                </div>
+                <button type="submit" class="submit-btn">登入</button>
+                <p class="form-footer">還不是會員？<a href="#" onclick="closeLoginModal();showRegisterModal()">立即註冊</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 會員註冊 -->
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>會員註冊</h2>
+                <button class="close-btn" onclick="closeRegisterModal()">✕</button>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-name">姓名 *</label>
+                    <input type="text" id="register-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email *</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">電話 *</label>
+                    <input type="tel" id="register-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-address">地址</label>
+                    <textarea id="register-address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">註冊</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 會員中心 -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>會員中心</h2>
+                <button class="close-btn" onclick="closeProfileModal()">✕</button>
+            </div>
+            <div id="profile-content"></div>
+        </div>
+    </div>
+
+    <!-- 訂單查詢 -->
+    <div class="modal" id="order-search-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>訂單查詢</h2>
+                <button class="close-btn" onclick="closeOrderSearchModal()">✕</button>
+            </div>
+            <form onsubmit="searchOrder(event)">
+                <div class="form-group">
+                    <label>查詢方式</label>
+                    <select id="search-type">
+                        <option value="orderNumber">訂單編號</option>
+                        <option value="phone">電話</option>
+                        <option value="email">Email</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>輸入查詢資料</label>
+                    <input type="text" id="search-value" required>
+                </div>
+                <button type="submit" class="submit-btn">查詢</button>
+            </form>
+            <div id="search-results"></div>
+        </div>
+    </div>
+
+    <!-- 訂單詳情 -->
+    <div class="modal" id="order-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>訂單詳情</h2>
+                <button class="close-btn" onclick="closeOrderDetailModal()">✕</button>
+            </div>
+            <div id="order-detail-content"></div>
+        </div>
+    </div>
+
+    <!-- 優惠券列表 -->
+    <div class="modal" id="coupons-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>可用優惠券</h2>
+                <button class="close-btn" onclick="closeCouponsModal()">✕</button>
+            </div>
+            <div id="coupons-list"></div>
+        </div>
+    </div>
+
+    <!-- 庫存管理（管理員） -->
+    <div class="modal" id="inventory-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>庫存管理</h2>
+                <button class="close-btn" onclick="closeInventoryModal()">✕</button>
+            </div>
+            <div id="inventory-content"></div>
+        </div>
+    </div>
+
+    <!-- 新增評價 -->
+    <div class="modal" id="add-review-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>撰寫評價</h2>
+                <button class="close-btn" onclick="closeAddReviewModal()">✕</button>
+            </div>
+            <form id="add-review-form" onsubmit="submitReview(event)">
+                <input type="hidden" id="review-product-id">
+                <div class="form-group">
+                    <label>評分</label>
+                    <input type="range" id="review-rating" min="1" max="5" value="5"
+                           oninput="updateRatingStars(this.value)">
+                    <div id="rating-display" class="rating-display">★★★★★</div>
+                </div>
+                <div class="form-group">
+                    <label for="review-comment">評價內容</label>
+                    <textarea id="review-comment" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">送出評價</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript 檔案 -->
+    <script src="products.js"></script>
+    <script src="security.js"></script>
+    <script src="cart.js"></script>
+    <script src="checkout.js"></script>
+    <script src="member.js"></script>
+    <script src="order-tracking.js"></script>
+    <script src="coupon.js"></script>
+    <script src="inventory.js"></script>
+    <script src="payment.js"></script>
+    <script src="reviews.js"></script>
+    <script src="recommendations.js"></script>
+</body>
+</html>
