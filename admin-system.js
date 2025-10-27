@@ -170,9 +170,10 @@ const AdminSystem = {
         // 儲存設定
         localStorage.setItem('security_config', JSON.stringify(config));
 
-        // 套用到 SecuritySystem
-        if (typeof SecuritySystem !== 'undefined') {
-            SecuritySystem.config = config;
+        // 套用到 SecuritySystem - 重新載入 SECURITY_CONFIG
+        if (typeof getSecurityConfig === 'function') {
+            SECURITY_CONFIG = getSecurityConfig();
+            console.log('✅ SECURITY_CONFIG 已重新載入', SECURITY_CONFIG);
         }
 
         console.log('✅ 安全性設定已更新');

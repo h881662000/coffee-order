@@ -1,12 +1,12 @@
 // 安全性與防護機制
 
-// 安全設定
-const SECURITY_CONFIG = {
+// 預設安全設定
+const DEFAULT_SECURITY_CONFIG = {
     // 訂單頻率限制
     ORDER_RATE_LIMIT: {
         maxOrders: 999,              // 最大訂單數
-        timeWindow: 36000000,       // 時間窗口（1小時，毫秒）
-        blockDuration: 864000000    // 封鎖時長（24小時，毫秒）
+        timeWindow: 36000000,       // 時間窗口（毫秒）
+        blockDuration: 864000000    // 封鎖時長（毫秒）
     },
 
     // 購物車限制
@@ -29,6 +29,47 @@ const SECURITY_CONFIG = {
         suspiciousThreshold: 5     // 可疑行為閾值
     }
 };
+
+// 取得當前安全設定（優先使用 localStorage 的設定）
+function getSecurityConfig() {
+    const savedConfig = localStorage.getItem('security_config');
+    if (savedConfig) {
+        try {
+            const config = JSON.parse(savedConfig);
+            // 轉換管理者面板的設定格式為 SecuritySystem 使用的格式
+            return {
+                ORDER_RATE_LIMIT: {
+                    maxOrders: config.rateLimit.maxOrders,
+                    timeWindow: config.rateLimit.timeWindow * 60 * 1000, // 分鐘轉毫秒
+                    blockDuration: config.rateLimit.blockDuration * 60 * 1000 // 分鐘轉毫秒
+                },
+                CART_LIMITS: {
+                    maxItems: config.cartLimits.maxItems,
+                    maxQuantityPerItem: config.cartLimits.maxQuantityPerProduct,
+                    maxTotalQuantity: config.cartLimits.maxTotalQuantity
+                },
+                ORDER_LIMITS: {
+                    minAmount: config.orderLimits.minAmount,
+                    maxAmount: config.orderLimits.maxAmount,
+                    maxItemPrice: 10000
+                },
+                DEVICE_LIMITS: {
+                    maxOrdersPerDevice: 10,
+                    suspiciousThreshold: 5
+                },
+                CAPTCHA: config.captcha,
+                VALIDATION: config.validation
+            };
+        } catch (e) {
+            console.error('讀取安全設定失敗，使用預設值', e);
+            return DEFAULT_SECURITY_CONFIG;
+        }
+    }
+    return DEFAULT_SECURITY_CONFIG;
+}
+
+// 動態安全設定（會從 localStorage 讀取）
+let SECURITY_CONFIG = getSecurityConfig();
 
 // 安全管理系統
 const SecuritySystem = {
