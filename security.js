@@ -6,7 +6,7 @@ const DEFAULT_SECURITY_CONFIG = {
     ORDER_RATE_LIMIT: {
         maxOrders: 999,              // 最大訂單數
         timeWindow: 36000000,       // 時間窗口（毫秒）
-        blockDuration: 864000000    // 封鎖時長（毫秒）
+        blockDuration: 1    // 封鎖時長（毫秒）
     },
 
     // 購物車限制
