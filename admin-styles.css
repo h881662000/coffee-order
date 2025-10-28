@@ -477,3 +477,142 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* 會員管理 */
+.members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.member-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.member-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3498db;
+    margin-bottom: 15px;
+}
+
+.member-level {
+    background: #3498db;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.member-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.member-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+/* 報表分析 */
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ranking-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto auto;
+    gap: 15px;
+    align-items: center;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+.rank {
+    font-weight: bold;
+    font-size: 18px;
+    color: #3498db;
+}
+
+.product-name {
+    font-weight: bold;
+}
+
+/* 成本管理 */
+.costs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.cost-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.cost-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3498db;
+}
+
+.cost-header h4 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.cost-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.cost-section {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.cost-section h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.cost-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.cost-row:last-child {
+    border-bottom: none;
+}
+
+.cost-row span:first-child {
+    color: #7f8c8d;
+}
+
+.cost-row span:last-child {
+    font-weight: bold;
+}

@@ -178,9 +178,6 @@ function renderRecommendations(recommendations, title = '推薦商品') {
                     </div>
                 ` : ''}
                 <div class="product-price">NT$ ${product.prices['120g']}</div>
-                <button onclick="quickAddToCart('${product.id}', '120g')" class="quick-add-btn">
-                    快速加入
-                </button>
             </div>
         `;
     });
@@ -223,12 +220,6 @@ function showCartRecommendations() {
     } else {
         container.style.display = 'none';
     }
-}
-
-// 快速加入購物車
-function quickAddToCart(productId, size) {
-    addToCart(productId, size);
-    alert('已加入購物車！');
 }
 
 // 在產品詳情頁顯示相似產品

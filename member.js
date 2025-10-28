@@ -326,3 +326,51 @@ function autoFillCheckoutForm() {
 document.addEventListener('DOMContentLoaded', () => {
     updateMemberUI();
 });
+
+// ==================== 管理者功能 ====================
+
+/**
+ * 刪除會員
+ * @param {string} memberId - 會員 ID
+ * @returns {boolean} 是否成功刪除
+ */
+MemberSystem.deleteMember = function(memberId) {
+    let members = this.getAllMembers();
+    const index = members.findIndex(m => m.id === memberId);
+
+    if (index === -1) {
+        console.error('找不到會員:', memberId);
+        return false;
+    }
+
+    members.splice(index, 1);
+    localStorage.setItem('members', JSON.stringify(members));
+    console.log('✅ 會員已刪除:', memberId);
+
+    return true;
+};
+
+/**
+ * 調整會員點數
+ * @param {string} memberId - 會員 ID
+ * @param {number} points - 要調整的點數（正數增加，負數扣除）
+ * @returns {boolean} 是否成功調整
+ */
+MemberSystem.adjustPoints = function(memberId, points) {
+    let members = this.getAllMembers();
+    const member = members.find(m => m.id === memberId);
+
+    if (!member) {
+        console.error('找不到會員:', memberId);
+        return false;
+    }
+
+    member.points = Math.max(0, member.points + points);
+    localStorage.setItem('members', JSON.stringify(members));
+    console.log(`✅ 會員 ${memberId} 點數已調整 ${points > 0 ? '+' : ''}${points}`);
+
+    // 重新計算等級
+    this.calculateMemberLevel(member);
+
+    return true;
+};

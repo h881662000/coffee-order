@@ -57,7 +57,20 @@ function switchAdminTab(tabName) {
             showProductSettings();
             break;
         case 'orders':
-            showOrderManagement();
+            if (typeof showOrderManagementWithDelete === 'function') {
+                showOrderManagementWithDelete();
+            } else {
+                showOrderManagement();
+            }
+            break;
+        case 'members':
+            showMemberManagement();
+            break;
+        case 'reports':
+            showReportsAnalysis();
+            break;
+        case 'costs':
+            showCostManagement();
             break;
         case 'logs':
             showSecurityLogs();

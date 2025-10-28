@@ -301,11 +301,6 @@
                     <input type="password" id="admin-password" placeholder="請輸入密碼" required>
                 </div>
                 <button type="submit" class="submit-btn">登入</button>
-                <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-size: 12px;">
-                    <strong>預設帳號密碼：</strong><br>
-                    帳號：admin<br>
-                    密碼：admin123
-                </div>
             </form>
         </div>
     </div>
@@ -331,6 +326,15 @@
                     <div class="admin-tab" onclick="switchAdminTab('orders')">
                         <span class="admin-tab-icon">📋</span> 訂單管理
                     </div>
+                    <div class="admin-tab" onclick="switchAdminTab('members')">
+                        <span class="admin-tab-icon">👥</span> 會員管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('reports')">
+                        <span class="admin-tab-icon">📈</span> 報表分析
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('costs')">
+                        <span class="admin-tab-icon">💰</span> 成本管理
+                    </div>
                     <div class="admin-tab" onclick="switchAdminTab('logs')">
                         <span class="admin-tab-icon">📜</span> 安全日誌
                     </div>
@@ -347,6 +351,15 @@
                     </div>
                     <div id="admin-orders" class="admin-tab-content">
                         <!-- 訂單管理內容 -->
+                    </div>
+                    <div id="admin-members" class="admin-tab-content">
+                        <!-- 會員管理內容 -->
+                    </div>
+                    <div id="admin-reports" class="admin-tab-content">
+                        <!-- 報表分析內容 -->
+                    </div>
+                    <div id="admin-costs" class="admin-tab-content">
+                        <!-- 成本管理內容 -->
                     </div>
                     <div id="admin-logs" class="admin-tab-content">
                         <!-- 安全日誌內容 -->
@@ -419,5 +432,6 @@
     <script src="recommendations.js"></script>
     <script src="admin-system.js"></script>
     <script src="admin-panel.js"></script>
+    <script src="admin-advanced.js"></script>
 </body>
 </html>
