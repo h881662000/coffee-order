@@ -116,6 +116,9 @@ async function submitOrder(event) {
         paymentMethod: selectedPaymentMethod || 'COD'
     };
 
+    // 🔍 Debug: 顯示訂單資料（測試時使用）
+    console.log('📦 訂單資料：', JSON.stringify(orderData, null, 2));
+
     // 8. 檢測可疑訂單
     const suspiciousCheck = SecuritySystem.detectSuspiciousOrder(orderData);
     if (suspiciousCheck.isSuspicious) {
