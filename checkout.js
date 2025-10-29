@@ -224,7 +224,7 @@ function generateOrderNumber() {
 // 提交到 Google Sheets
 async function submitToGoogleSheets(orderData) {
     // Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTyVMzPWHAvqdmoxsdC7pxyz6kn-Aqsl9sZL49wZAz-gc-l4s2LZQWXFEcaVtdKAEo/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVZQbkAKm6KFlV2EuJh_SulQapYpSvTLP5IhOY-gYp86lh8UDcp_DbFEYiaHCS4MwY/exec';
 
     // 如果尚未設定 Google Apps Script URL，暫時儲存到 localStorage
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
