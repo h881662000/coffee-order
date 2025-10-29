@@ -224,7 +224,7 @@ function generateOrderNumber() {
 // 提交到 Google Sheets
 async function submitToGoogleSheets(orderData) {
     // Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVZQbkAKm6KFlV2EuJh_SulQapYpSvTLP5IhOY-gYp86lh8UDcp_DbFEYiaHCS4MwY/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsfmnuBFP1cnhyOBdgG0MnH0MoL0RThKSwZgL7jUsmPx8EjFwWi5hPE8NeFrdDUeA/exec';
 
     // 如果尚未設定 Google Apps Script URL，暫時儲存到 localStorage
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
@@ -234,6 +234,12 @@ async function submitToGoogleSheets(orderData) {
     }
 
     try {
+        // 🔍 Debug: 顯示實際送出的資料
+        console.log('🚀 準備送出訂單：');
+        console.log('📦 完整訂單資料：', JSON.stringify(orderData, null, 2));
+        console.log('🛒 商品清單：', orderData.items);
+        console.log('👤 客戶資料：', orderData.customer);
+
         // 實際提交到 Google Sheets
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
