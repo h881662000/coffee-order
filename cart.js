@@ -20,6 +20,7 @@ function addToCart(productId, size) {
     } else {
         cart.push({
             productId: productId,
+            id: productId,           // ← 加入 id（與 productId 相同）
             name: product.name,
             size: size,
             price: product.prices[size],
@@ -120,6 +121,7 @@ function getCartTotal() {
 // 取得購物車項目摘要
 function getCartSummary() {
     return cart.map(item => ({
+        id: item.id,           // ← 加入商品 ID（用於後端價格驗證）
         name: item.name,
         size: item.size,
         quantity: item.quantity,
