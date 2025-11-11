@@ -1,5 +1,5 @@
-// 咖啡產品資料
-const products = [
+// 咖啡產品資料 - 預設商品（僅在初始化時使用）
+const DEFAULT_PRODUCTS = [
     {
         id: 'A',
         name: '咖啡豆 A',
@@ -39,19 +39,101 @@ const products = [
             '260g': 800
         },
         image: '☕'
+    },
+    {
+        id: 'E',
+        name: '濾掛咖啡包',
+        description: '精選咖啡豆研磨，方便攜帶的濾掛包裝，隨時享受新鮮咖啡。',
+        prices: {
+            '10入': 280
+        },
+        image: '☕'
+    },
+    {
+        id: 'F',
+        name: '精品咖啡豆',
+        description: '限量精品咖啡豆，提供多種包裝規格選擇。',
+        prices: {
+            '120g': 450,
+            '260g': 850,
+            '500g': 1600
+        },
+        image: '☕'
     }
 ];
+
+// 初始化商品資料（從 localStorage 載入，若無則使用預設）
+function initializeProducts() {
+    const savedProducts = localStorage.getItem('products_config');
+    if (savedProducts) {
+        try {
+            return JSON.parse(savedProducts);
+        } catch (e) {
+            console.error('載入商品資料失敗，使用預設商品', e);
+            localStorage.setItem('products_config', JSON.stringify(DEFAULT_PRODUCTS));
+            return DEFAULT_PRODUCTS;
+        }
+    } else {
+        // 首次使用，儲存預設商品
+        localStorage.setItem('products_config', JSON.stringify(DEFAULT_PRODUCTS));
+        return DEFAULT_PRODUCTS;
+    }
+}
+
+// 動態載入的商品資料
+let products = initializeProducts();
 
 // 渲染產品列表
 function renderProducts() {
     const productGrid = document.getElementById('product-grid');
+    if (!productGrid) return; // 如果不在商品頁面，直接返回
+
+    productGrid.innerHTML = ''; // 清空現有內容
+
+    // 重新從 localStorage 載入商品資料
+    const savedProducts = localStorage.getItem('products_config');
+    if (savedProducts) {
+        try {
+            products = JSON.parse(savedProducts);
+        } catch (e) {
+            console.error('載入商品資料失敗', e);
+        }
+    }
+
+    // 如果沒有商品，顯示空狀態
+    if (!products || products.length === 0) {
+        productGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">☕</div>
+                <h3 style="color: #95a5a6; margin-bottom: 10px;">目前沒有商品</h3>
+                <p style="color: #bdc3c7;">請聯絡管理員新增商品</p>
+            </div>
+        `;
+        return;
+    }
 
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
 
+        // 處理圖片顯示
+        let imageHTML;
+        if (typeof ImageSystem !== 'undefined' && product.image) {
+            const imageURL = ImageSystem.getImageURL(product.image);
+            if (imageURL) {
+                // 使用實際圖片
+                imageHTML = `<img src="${imageURL}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                // 使用 emoji 或文字
+                imageHTML = product.image || '☕';
+            }
+        } else {
+            // 預設使用 emoji
+            imageHTML = product.image || '☕';
+        }
+
         productCard.innerHTML = `
-            <div class="product-image">${product.image}</div>
+            <div class="product-image">${imageHTML}</div>
             <div class="product-name">${product.name}</div>
             <div class="product-description">${product.description}</div>
             <div class="product-options">

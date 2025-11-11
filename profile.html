@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會員中心 - DiDo咖啡</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-extended.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="elegant-effects.css">
+    <style>
+        /* 會員中心頁面專用樣式 */
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 60vh;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #3d2817;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 8px 24px rgba(111, 78, 55, 0.12);
+        }
+
+        .profile-card h2 {
+            font-size: 1.4rem;
+            color: #3d2817;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .info-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #3d2817;
+            font-weight: 500;
+        }
+
+        .edit-profile-btn {
+            background: #6F4E37;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-profile-btn:hover {
+            background: #5a3d2a;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6F4E37;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #f8f8f8;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            color: #3d2817;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #e8dfd5;
+        }
+
+        .login-required {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .login-required-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <!-- 導航會由 common.js 生成 -->
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="profile-container">
+            <div class="page-header">
+                <h1>👤 會員中心</h1>
+                <p>管理您的個人資料和訂單</p>
+            </div>
+
+            <div id="profile-content">
+                <!-- 會員資料會由 JavaScript 動態生成 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 編輯個人資料 Modal -->
+    <div class="modal" id="edit-profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>編輯個人資料</h2>
+                <button class="close-btn" onclick="closeEditProfile()">✕</button>
+            </div>
+            <form onsubmit="saveProfile(event)">
+                <div class="form-group">
+                    <label for="edit-name">姓名 *</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">Email *</label>
+                    <input type="email" id="edit-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-phone">電話 *</label>
+                    <input type="tel" id="edit-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-address">地址</label>
+                    <textarea id="edit-address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">儲存變更</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 會員登入 -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>登入</h2>
+                <button class="close-btn" onclick="closeLoginModal()">✕</button>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-account">帳號 / Email / 電話 *</label>
+                    <input type="text" id="login-account" placeholder="請輸入帳號、Email 或電話" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密碼</label>
+                    <input type="password" id="login-password" placeholder="會員登入可留空，管理者請輸入密碼">
+                </div>
+                <button type="submit" class="submit-btn">登入</button>
+                <p class="form-footer">還不是會員？<a href="#" onclick="closeLoginModal();showRegisterModal()">立即註冊</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 會員註冊 -->
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>會員註冊</h2>
+                <button class="close-btn" onclick="closeRegisterModal()">✕</button>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-name">姓名 *</label>
+                    <input type="text" id="register-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email *</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">電話 *</label>
+                    <input type="tel" id="register-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-address">地址</label>
+                    <textarea id="register-address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">註冊</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理者面板 -->
+    <div class="modal" id="admin-panel-modal">
+        <div class="modal-content">
+            <div class="admin-header-bar">
+                <h2>🛠️ 管理者面板</h2>
+                <button class="admin-logout-btn" onclick="adminLogout()">登出</button>
+            </div>
+            <div class="admin-panel-container">
+                <div class="admin-sidebar">
+                    <div class="admin-tab active" onclick="switchAdminTab('dashboard')">
+                        <span class="admin-tab-icon">📊</span> 儀表板
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('security')">
+                        <span class="admin-tab-icon">🔒</span> 安全性設定
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('products')">
+                        <span class="admin-tab-icon">📦</span> 商品管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('orders')">
+                        <span class="admin-tab-icon">📋</span> 訂單管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('admins')" id="admin-tab-admins">
+                        <span class="admin-tab-icon">👥</span> 管理員管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('logs')">
+                        <span class="admin-tab-icon">📜</span> 安全日誌
+                    </div>
+                </div>
+                <div class="admin-content">
+                    <div id="admin-dashboard" class="admin-tab-content" style="display: block;"></div>
+                    <div id="admin-security" class="admin-tab-content"></div>
+                    <div id="admin-products" class="admin-tab-content"></div>
+                    <div id="admin-orders" class="admin-tab-content"></div>
+                    <div id="admin-admins" class="admin-tab-content">
+                        <div class="admin-section">
+                            <div class="section-header">
+                                <h3>👥 管理員帳號管理</h3>
+                                <button onclick="showAddAdminForm()" class="add-admin-btn" id="add-admin-btn">➕ 新增管理員</button>
+                            </div>
+                            <div id="admins-list" class="admins-list"></div>
+                        </div>
+                    </div>
+                    <div id="admin-logs" class="admin-tab-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增商品 Modal -->
+    <div class="modal" id="add-product-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ 新增商品</h2>
+                <button class="close-btn" onclick="closeAddProductForm()">✕</button>
+            </div>
+            <form onsubmit="submitAddProduct(event)">
+                <div class="form-group">
+                    <label>商品 ID *</label>
+                    <input type="text" id="new-product-id" placeholder="例如：E" required>
+                </div>
+                <div class="form-group">
+                    <label>商品名稱 *</label>
+                    <input type="text" id="new-product-name" required>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="new-product-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>商品圖片</label>
+                    <div class="image-preview" id="new-product-preview"><div style="font-size: 48px;">☕</div></div>
+                    <div class="image-upload-options">
+                        <label class="upload-tab active" onclick="switchNewProductUploadMode('file')">
+                            <input type="radio" name="new-upload-mode" value="file" checked> 上傳圖片
+                        </label>
+                        <label class="upload-tab" onclick="switchNewProductUploadMode('url')">
+                            <input type="radio" name="new-upload-mode" value="url"> 圖片網址
+                        </label>
+                    </div>
+                    <div id="new-upload-file" class="upload-section active">
+                        <input type="file" id="new-image-file" accept="image/*" onchange="previewNewProductImage(event)">
+                    </div>
+                    <div id="new-upload-url" class="upload-section" style="display:none;">
+                        <input type="url" id="new-image-url" onchange="previewNewProductImageURL(event)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>120g 價格（NT$）*</label>
+                        <input type="number" id="new-product-price120" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>260g 價格（NT$）*</label>
+                        <input type="number" id="new-product-price260" required min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>產地</label>
+                    <input type="text" id="new-product-origin">
+                </div>
+                <div class="form-group">
+                    <label>烘焙度</label>
+                    <input type="text" id="new-product-roast">
+                </div>
+                <div class="form-group">
+                    <label>風味</label>
+                    <input type="text" id="new-product-flavor">
+                </div>
+                <button type="submit" class="submit-btn">➕ 新增商品</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 新增/編輯管理員 Modal -->
+    <div class="modal" id="admin-form-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="admin-form-title">➕ 新增管理員</h2>
+                <button class="close-btn" onclick="closeAdminForm()">✕</button>
+            </div>
+            <form onsubmit="submitAdminForm(event)">
+                <input type="hidden" id="edit-admin-username">
+                <div class="form-group">
+                    <label>帳號 *</label>
+                    <input type="text" id="admin-form-username" required>
+                </div>
+                <div class="form-group">
+                    <label>顯示名稱 *</label>
+                    <input type="text" id="admin-form-displayname" required>
+                </div>
+                <div class="form-group">
+                    <label id="admin-form-password-label">密碼 *</label>
+                    <input type="password" id="admin-form-password">
+                </div>
+                <div class="form-group">
+                    <label>權限設定</label>
+                    <div class="permissions-grid">
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageProducts"><span>管理商品</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageImages"><span>管理圖片</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageOrders"><span>管理訂單</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageMembers"><span>管理會員</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageSecurity"><span>管理安全設定</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageAdmins"><span>管理管理員帳號</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-viewStats"><span>查看統計資料</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-viewLogs"><span>查看日誌</span>
+                        </label>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button type="button" onclick="selectAllPermissions()" class="small-btn">全選</button>
+                        <button type="button" onclick="clearAllPermissions()" class="small-btn">清除</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" id="admin-form-submit">➕ 新增管理員</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript 檔案 -->
+    <script src="products.js"></script>
+    <script src="security.js"></script>
+    <script src="member.js"></script>
+    <script src="permission-system.js"></script>
+    <script src="admin-system.js"></script>
+    <script src="admin-management.js"></script>
+    <script src="admin-panel.js"></script>
+    <script src="site-config.js"></script>
+    <script src="common.js"></script>
+
+    <script>
+        // 會員中心頁面邏輯
+        function loadProfile() {
+            const profileContent = document.getElementById('profile-content');
+
+            // 檢查是否登入
+            if (typeof MemberSystem === 'undefined' || !MemberSystem.isLoggedIn()) {
+                profileContent.innerHTML = `
+                    <div class="login-required">
+                        <div class="login-required-icon">🔒</div>
+                        <h2>請先登入</h2>
+                        <p>您需要登入會員才能查看個人資料</p>
+                        <button onclick="showLoginModal()" class="submit-btn">立即登入</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const member = MemberSystem.getCurrentMember();
+
+            // 計算訂單統計
+            const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const memberOrders = allOrders.filter(order =>
+                order.customerEmail === member.email ||
+                order.customerPhone === member.phone
+            );
+
+            const totalOrders = memberOrders.length;
+            const totalSpent = memberOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+            // 渲染會員資料
+            profileContent.innerHTML = `
+                <div class="profile-grid">
+                    <!-- 個人資料卡片 -->
+                    <div class="profile-card">
+                        <h2><span class="card-icon">👤</span> 個人資料</h2>
+                        <div class="info-item">
+                            <div class="info-label">姓名</div>
+                            <div class="info-value">${member.name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${member.email}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">電話</div>
+                            <div class="info-value">${member.phone}</div>
+                        </div>
+                        ${member.address ? `
+                            <div class="info-item">
+                                <div class="info-label">地址</div>
+                                <div class="info-value">${member.address}</div>
+                            </div>
+                        ` : ''}
+                        <button onclick="showEditProfile()" class="edit-profile-btn">
+                            ✏️ 編輯個人資料
+                        </button>
+                    </div>
+
+                    <!-- 訂單統計卡片 -->
+                    <div class="profile-card">
+                        <h2><span class="card-icon">📊</span> 訂單統計</h2>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">${totalOrders}</div>
+                                <div class="stat-label">總訂單數</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">NT$ ${totalSpent}</div>
+                                <div class="stat-label">總消費金額</div>
+                            </div>
+                        </div>
+                        <div class="quick-actions">
+                            <a href="my-orders.html" class="action-btn">
+                                <span>📦</span>
+                                <span>查看我的訂單</span>
+                            </a>
+                            <a href="products.html" class="action-btn">
+                                <span>☕</span>
+                                <span>繼續購物</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showEditProfile() {
+            const member = MemberSystem.getCurrentMember();
+            if (!member) return;
+
+            document.getElementById('edit-name').value = member.name;
+            document.getElementById('edit-email').value = member.email;
+            document.getElementById('edit-phone').value = member.phone;
+            document.getElementById('edit-address').value = member.address || '';
+
+            document.getElementById('edit-profile-modal').style.display = 'flex';
+        }
+
+        function closeEditProfile() {
+            document.getElementById('edit-profile-modal').style.display = 'none';
+        }
+
+        function saveProfile(event) {
+            event.preventDefault();
+
+            const updatedData = {
+                name: document.getElementById('edit-name').value.trim(),
+                email: document.getElementById('edit-email').value.trim(),
+                phone: document.getElementById('edit-phone').value.trim(),
+                address: document.getElementById('edit-address').value.trim()
+            };
+
+            if (typeof MemberSystem !== 'undefined') {
+                const result = MemberSystem.updateProfile(updatedData);
+                if (result.success) {
+                    alert('✅ 個人資料已更新');
+                    closeEditProfile();
+                    loadProfile();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            }
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+        });
+    </script>
+</body>
+</html>

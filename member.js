@@ -18,6 +18,11 @@ class Member {
 
 // 會員管理
 const MemberSystem = {
+    // 檢查是否已登入
+    isLoggedIn() {
+        return !!localStorage.getItem('currentMember');
+    },
+
     // 取得當前登入會員
     getCurrentMember() {
         const memberData = localStorage.getItem('currentMember');
@@ -86,6 +91,40 @@ const MemberSystem = {
         return null;
     },
 
+    // 更新當前會員的個人資料
+    updateProfile(updates) {
+        const member = this.getCurrentMember();
+        if (!member) {
+            return { success: false, message: '請先登入' };
+        }
+
+        // 檢查 email 是否已被其他會員使用
+        if (updates.email && updates.email !== member.email) {
+            const members = this.getAllMembers();
+            const emailExists = members.find(m => m.id !== member.id && m.email === updates.email);
+            if (emailExists) {
+                return { success: false, message: 'Email 已被使用' };
+            }
+        }
+
+        // 檢查電話是否已被其他會員使用
+        if (updates.phone && updates.phone !== member.phone) {
+            const members = this.getAllMembers();
+            const phoneExists = members.find(m => m.id !== member.id && m.phone === updates.phone);
+            if (phoneExists) {
+                return { success: false, message: '電話號碼已被使用' };
+            }
+        }
+
+        // 更新資料
+        const updatedMember = this.updateMember(member.id, updates);
+        if (updatedMember) {
+            return { success: true, member: updatedMember };
+        }
+
+        return { success: false, message: '更新失敗' };
+    },
+
     // 新增訂單後更新會員資料
     updateMemberAfterOrder(orderId, orderTotal) {
         const member = this.getCurrentMember();
@@ -150,6 +189,12 @@ function updateMemberUI() {
 
     if (!memberArea) return;
 
+    // 如果已登入管理者，不顯示會員資訊
+    if (typeof AdminSystem !== 'undefined' && AdminSystem.isLoggedIn()) {
+        memberArea.innerHTML = '';
+        return;
+    }
+
     if (member) {
         const levelInfo = MemberSystem.getLevelInfo(member.level);
         memberArea.innerHTML = `
@@ -190,13 +235,30 @@ function closeLoginModal() {
 }
 
 // 處理登入
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
 
-    const email = document.getElementById('login-email').value;
-    const phone = document.getElementById('login-phone').value;
+    const account = document.getElementById('login-account').value.trim();
+    const password = document.getElementById('login-password').value;
 
-    const member = MemberSystem.login(email, phone);
+    // 如果有輸入密碼，先嘗試管理者登入
+    if (password) {
+        const adminResult = await AdminSystem.login(account, password);
+
+        if (adminResult.success) {
+            closeLoginModal();
+            alert(`歡迎，管理者 ${AdminSystem.getCurrentAdmin().displayName || account}！`);
+            // 顯示管理者面板
+            showAdminPanel();
+            return;
+        }
+        // 管理者登入失敗，提示錯誤（不再嘗試會員登入）
+        alert('❌ 管理者帳號或密碼錯誤');
+        return;
+    }
+
+    // 沒有密碼，嘗試會員登入（使用 account 作為 email 或 phone）
+    const member = MemberSystem.login(account, account);
 
     if (member) {
         closeLoginModal();
@@ -326,51 +388,3 @@ function autoFillCheckoutForm() {
 document.addEventListener('DOMContentLoaded', () => {
     updateMemberUI();
 });
-
-// ==================== 管理者功能 ====================
-
-/**
- * 刪除會員
- * @param {string} memberId - 會員 ID
- * @returns {boolean} 是否成功刪除
- */
-MemberSystem.deleteMember = function(memberId) {
-    let members = this.getAllMembers();
-    const index = members.findIndex(m => m.id === memberId);
-
-    if (index === -1) {
-        console.error('找不到會員:', memberId);
-        return false;
-    }
-
-    members.splice(index, 1);
-    localStorage.setItem('members', JSON.stringify(members));
-    console.log('✅ 會員已刪除:', memberId);
-
-    return true;
-};
-
-/**
- * 調整會員點數
- * @param {string} memberId - 會員 ID
- * @param {number} points - 要調整的點數（正數增加，負數扣除）
- * @returns {boolean} 是否成功調整
- */
-MemberSystem.adjustPoints = function(memberId, points) {
-    let members = this.getAllMembers();
-    const member = members.find(m => m.id === memberId);
-
-    if (!member) {
-        console.error('找不到會員:', memberId);
-        return false;
-    }
-
-    member.points = Math.max(0, member.points + points);
-    localStorage.setItem('members', JSON.stringify(members));
-    console.log(`✅ 會員 ${memberId} 點數已調整 ${points > 0 ? '+' : ''}${points}`);
-
-    // 重新計算等級
-    this.calculateMemberLevel(member);
-
-    return true;
-};

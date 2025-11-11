@@ -143,6 +143,77 @@ main {
     margin: 15px 0;
 }
 
+.product-prices {
+    margin: 15px 0;
+    padding: 8px;
+    background: #f8f5f2;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.price-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.price-option:hover {
+    border-color: #6f4e37;
+    background: #fffbf7;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(111, 78, 55, 0.15);
+}
+
+.price-option.selected {
+    border-color: #6f4e37;
+    background: #6f4e37;
+}
+
+.price-option.selected .weight,
+.price-option.selected .price {
+    color: white;
+}
+
+.price-option .weight {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.price-option .price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #6f4e37;
+}
+
+.product-actions {
+    margin-top: 15px;
+}
+
+.weight-select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    background: white;
+    cursor: pointer;
+}
+
+.weight-select:focus {
+    outline: none;
+    border-color: #6f4e37;
+}
+
 .add-to-cart-btn {
     width: 100%;
     padding: 12px;

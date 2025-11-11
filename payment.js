@@ -21,7 +21,7 @@ const PAYMENT_METHODS = {
             bank: '台灣銀行',
             branch: '信義分行',
             account: '123-456-789012',
-            accountName: '咖啡熟豆專賣店'
+            accountName: 'DiDo咖啡'
         }
     },
     CREDIT_CARD: {

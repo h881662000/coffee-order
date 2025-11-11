@@ -33,19 +33,7 @@
     gap: 10px;
 }
 
-.member-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.member-btn:hover {
-    background: rgba(255,255,255,0.2);
-}
+/* member-btn 樣式移至 elegant-effects.css 統一管理 */
 
 .member-level {
     font-weight: bold;

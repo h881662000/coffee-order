@@ -1,12 +1,5 @@
 // 管理者系統
 const AdminSystem = {
-    // 管理者帳號配置（實際使用時應該加密或使用後端驗證）
-    credentials: {
-        username: 'admin',
-        // 密碼: admin123 (SHA-256 hash)
-        passwordHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
-    },
-
     // 當前登入狀態
     currentAdmin: null,
 
@@ -30,16 +23,7 @@ const AdminSystem = {
         }
     },
 
-    // SHA-256 雜湊函數
-    async hashPassword(password) {
-        const msgBuffer = new TextEncoder().encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return hashHex;
-    },
-
-    // 登入
+    // 登入（使用 PermissionSystem）
     async login(username, password) {
         if (!username || !password) {
             return {
@@ -48,28 +32,17 @@ const AdminSystem = {
             };
         }
 
-        // 驗證帳號
-        if (username !== this.credentials.username) {
-            console.log('登入失敗：帳號錯誤');
-            return {
-                success: false,
-                message: '帳號或密碼錯誤'
-            };
-        }
+        // 使用 PermissionSystem 驗證
+        const result = await PermissionSystem.validateLogin(username, password);
 
-        // 驗證密碼
-        const passwordHash = await this.hashPassword(password);
-        if (passwordHash !== this.credentials.passwordHash) {
-            console.log('登入失敗：密碼錯誤');
-            return {
-                success: false,
-                message: '帳號或密碼錯誤'
-            };
+        if (!result.success) {
+            console.log('登入失敗');
+            return result;
         }
 
         // 登入成功
         this.currentAdmin = {
-            username: username,
+            ...result.admin,
             loginTime: Date.now()
         };
 
@@ -79,7 +52,7 @@ const AdminSystem = {
         // 更新 UI
         this.updateAdminUI();
 
-        console.log('✅ 管理者登入成功');
+        console.log('✅ 管理者登入成功:', username);
 
         return {
             success: true,
@@ -100,22 +73,38 @@ const AdminSystem = {
         return this.currentAdmin !== null;
     },
 
+    // 檢查權限
+    hasPermission(permission) {
+        if (!this.isLoggedIn()) return false;
+        return PermissionSystem.hasPermission(this.currentAdmin, permission);
+    },
+
+    // 取得當前管理員資訊
+    getCurrentAdmin() {
+        return this.currentAdmin;
+    },
+
     // 更新 UI（顯示/隱藏管理者功能）
     updateAdminUI() {
-        const adminButton = document.getElementById('admin-login-btn');
         const adminPanel = document.getElementById('admin-panel-btn');
 
         if (this.isLoggedIn()) {
             // 已登入：顯示管理者面板按鈕
-            if (adminButton) adminButton.style.display = 'none';
             if (adminPanel) {
                 adminPanel.style.display = 'inline-block';
                 adminPanel.textContent = '🛠️ 管理者面板';
             }
+            // 隱藏會員登入區
+            if (typeof updateMemberUI === 'function') {
+                updateMemberUI();
+            }
         } else {
-            // 未登入：顯示登入按鈕
-            if (adminButton) adminButton.style.display = 'inline-block';
+            // 未登入：隱藏管理者面板按鈕
             if (adminPanel) adminPanel.style.display = 'none';
+            // 顯示會員登入區
+            if (typeof updateMemberUI === 'function') {
+                updateMemberUI();
+            }
         }
     },
 
@@ -204,6 +193,16 @@ const AdminSystem = {
 
     // 取得商品列表
     getProducts() {
+        // 從 localStorage 重新載入最新的商品資料
+        const savedProducts = localStorage.getItem('products_config');
+        if (savedProducts) {
+            try {
+                products = JSON.parse(savedProducts);
+            } catch (e) {
+                console.error('載入商品資料失敗', e);
+            }
+        }
+
         if (typeof products === 'undefined') {
             console.error('商品資料未載入');
             return [];
@@ -215,18 +214,31 @@ const AdminSystem = {
     updateProduct(productId, updates) {
         if (!this.isLoggedIn()) {
             console.error('未登入管理者');
-            return false;
+            return { success: false, message: '未登入管理者' };
+        }
+
+        // 檢查權限：更新商品資訊需要 MANAGE_PRODUCTS 權限
+        // 如果只更新圖片，則需要 MANAGE_IMAGES 權限
+        const isImageOnlyUpdate = Object.keys(updates).length === 1 && updates.hasOwnProperty('image');
+        const requiredPermission = isImageOnlyUpdate
+            ? PermissionSystem.PERMISSIONS.MANAGE_IMAGES
+            : PermissionSystem.PERMISSIONS.MANAGE_PRODUCTS;
+
+        if (!this.hasPermission(requiredPermission)) {
+            const permName = PermissionSystem.getPermissionName(requiredPermission);
+            console.error('沒有權限:', permName);
+            return { success: false, message: `沒有權限：${permName}` };
         }
 
         if (typeof products === 'undefined') {
             console.error('商品資料未載入');
-            return false;
+            return { success: false, message: '商品資料未載入' };
         }
 
         const product = products.find(p => p.id === productId);
         if (!product) {
             console.error('找不到商品:', productId);
-            return false;
+            return { success: false, message: '找不到商品' };
         }
 
         // 更新商品資訊
@@ -235,37 +247,43 @@ const AdminSystem = {
         // 儲存到 localStorage
         localStorage.setItem('products_config', JSON.stringify(products));
 
-        // 重新渲染商品
+        // 重新渲染前端商品列表
         if (typeof renderProducts === 'function') {
             renderProducts();
         }
 
         console.log('✅ 商品資訊已更新:', productId);
-        return true;
+        return { success: true, message: '商品資訊已更新' };
     },
 
     // 新增商品
     addProduct(productData) {
         if (!this.isLoggedIn()) {
             console.error('未登入管理者');
-            return false;
+            return { success: false, message: '未登入管理者' };
+        }
+
+        // 檢查權限
+        if (!this.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_PRODUCTS)) {
+            console.error('沒有權限：管理商品');
+            return { success: false, message: '沒有權限：管理商品' };
         }
 
         if (typeof products === 'undefined') {
             console.error('商品資料未載入');
-            return false;
+            return { success: false, message: '商品資料未載入' };
         }
 
         // 驗證商品資料
         if (!productData.id || !productData.name || !productData.prices) {
             console.error('商品資料不完整');
-            return false;
+            return { success: false, message: '商品資料不完整' };
         }
 
         // 檢查 ID 是否重複
         if (products.find(p => p.id === productData.id)) {
             console.error('商品 ID 已存在:', productData.id);
-            return false;
+            return { success: false, message: '商品 ID 已存在' };
         }
 
         // 新增商品
@@ -274,31 +292,37 @@ const AdminSystem = {
         // 儲存到 localStorage
         localStorage.setItem('products_config', JSON.stringify(products));
 
-        // 重新渲染商品
+        // 重新渲染前端商品列表
         if (typeof renderProducts === 'function') {
             renderProducts();
         }
 
         console.log('✅ 新增商品成功:', productData.id);
-        return true;
+        return { success: true, message: '新增商品成功' };
     },
 
     // 刪除商品
     deleteProduct(productId) {
         if (!this.isLoggedIn()) {
             console.error('未登入管理者');
-            return false;
+            return { success: false, message: '未登入管理者' };
+        }
+
+        // 檢查權限
+        if (!this.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_PRODUCTS)) {
+            console.error('沒有權限：管理商品');
+            return { success: false, message: '沒有權限：管理商品' };
         }
 
         if (typeof products === 'undefined') {
             console.error('商品資料未載入');
-            return false;
+            return { success: false, message: '商品資料未載入' };
         }
 
         const index = products.findIndex(p => p.id === productId);
         if (index === -1) {
             console.error('找不到商品:', productId);
-            return false;
+            return { success: false, message: '找不到商品' };
         }
 
         // 刪除商品
@@ -307,13 +331,13 @@ const AdminSystem = {
         // 儲存到 localStorage
         localStorage.setItem('products_config', JSON.stringify(products));
 
-        // 重新渲染商品
+        // 重新渲染前端商品列表
         if (typeof renderProducts === 'function') {
             renderProducts();
         }
 
         console.log('✅ 刪除商品成功:', productId);
-        return true;
+        return { success: true, message: '刪除商品成功' };
     },
 
     // 取得安全日誌
@@ -403,43 +427,10 @@ const AdminSystem = {
     }
 };
 
-// 顯示管理者登入對話框
+// 顯示管理者登入對話框（已整合到統一登入，重導向到會員登入）
 function showAdminLogin() {
-    const modal = document.getElementById('admin-login-modal');
-    if (modal) {
-        modal.classList.add('active');
-    }
-}
-
-// 關閉管理者登入對話框
-function closeAdminLogin() {
-    const modal = document.getElementById('admin-login-modal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-}
-
-// 提交管理者登入
-async function submitAdminLogin(event) {
-    event.preventDefault();
-
-    const username = document.getElementById('admin-username').value;
-    const password = document.getElementById('admin-password').value;
-
-    const result = await AdminSystem.login(username, password);
-
-    if (result.success) {
-        alert('✅ ' + result.message);
-        closeAdminLogin();
-
-        // 清空密碼欄位
-        document.getElementById('admin-password').value = '';
-
-        // 顯示管理者面板
-        showAdminPanel();
-    } else {
-        alert('❌ ' + result.message);
-        document.getElementById('admin-password').value = '';
+    if (typeof showLoginModal === 'function') {
+        showLoginModal();
     }
 }
 

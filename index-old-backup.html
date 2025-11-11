@@ -3,169 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DiDo咖啡</title>
+    <title>咖啡熟豆訂購平台</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="styles-extended.css">
     <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="elegant-effects.css">
-    <style>
-        /* 首頁專用樣式 */
-        .hero-section {
-            min-height: 70vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #3d2817;
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-
-        .hero-subtitle {
-            font-size: 1.5rem;
-            color: #6F4E37;
-            margin-bottom: 40px;
-            font-weight: 300;
-        }
-
-        .hero-description {
-            max-width: 600px;
-            font-size: 1.1rem;
-            color: #5a5a5a;
-            line-height: 1.8;
-            margin-bottom: 50px;
-        }
-
-        .cta-button {
-            background: #6F4E37;
-            color: white;
-            padding: 18px 48px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 16px rgba(111, 78, 55, 0.3);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .cta-button:hover {
-            background: #5a3d2a;
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(111, 78, 55, 0.4);
-        }
-
-        .about-section {
-            padding: 80px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-            margin-top: 60px;
-        }
-
-        .about-card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-        }
-
-        .about-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(111, 78, 55, 0.15);
-        }
-
-        .about-card-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-
-        .about-card h3 {
-            font-size: 1.4rem;
-            color: #3d2817;
-            margin-bottom: 15px;
-        }
-
-        .about-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .hero-description {
-                font-size: 1rem;
-            }
-
-            .cta-button {
-                padding: 14px 36px;
-                font-size: 1rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <!-- 導航會由 common.js 生成 -->
+            <h1 id="site-title">☕ 咖啡熟豆訂購平台</h1>
+            <nav class="header-nav">
+                <button onclick="showOrderSearchModal()" class="nav-btn">訂單查詢</button>
+                <button onclick="showMyOrders()" class="nav-btn">我的訂單</button>
+                <div id="member-area" class="member-area"></div>
+                <button id="admin-panel-btn" onclick="showAdminPanel()" class="nav-btn" style="display: none;">🛠️ 管理者面板</button>
+                <div class="cart-icon" onclick="toggleCart()">
+                    🛒 購物車 (<span id="cart-count">0</span>)
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <!-- Hero 區塊 -->
-        <section class="hero-section">
-            <h1 class="hero-title">品味每一顆咖啡豆的故事</h1>
-            <p class="hero-subtitle">精選世界各地的優質熟豆，為您帶來完美咖啡體驗</p>
-            <p class="hero-description">
-                我們堅持選用最優質的咖啡生豆，經過精心烘焙，<br>
-                將每一顆豆子的獨特風味完美呈現。<br>
-                從產地到您的杯中，我們用心對待每一個環節。
-            </p>
-            <a href="products.html" class="cta-button">開始選購 →</a>
+    <main class="container">
+        <!-- 推薦商品區 -->
+        <section id="home-recommendations" class="recommendations">
+            <!-- 推薦商品會由 JavaScript 動態生成 -->
         </section>
 
-        <!-- 關於我們區塊 -->
-        <section class="about-section">
-            <div class="about-grid">
-                <div class="about-card">
-                    <div class="about-card-icon">🌍</div>
-                    <h3>嚴選產地</h3>
-                    <p>與信譽優良的生豆商合作，由專業團隊嚴格挑選與品質控管，確保每一批咖啡豆都符合高品質標準。</p>
-                </div>
-
-                <div class="about-card">
-                    <div class="about-card-icon">🔥</div>
-                    <h3>專業烘焙</h3>
-                    <p>由經驗豐富的烘豆師掌握火候，針對不同產地與品種，調整最適合的烘焙曲線。</p>
-                </div>
-
-                <div class="about-card">
-                    <div class="about-card-icon">📦</div>
-                    <h3>新鮮直送</h3>
-                    <p>堅持小批量烘焙，接單後才進行烘焙與包裝，確保您收到的每一包都是最新鮮的狀態。</p>
-                </div>
+        <section class="products">
+            <h2>精選咖啡豆</h2>
+            <div class="product-grid" id="product-grid">
+                <!-- 產品會由 JavaScript 動態生成 -->
             </div>
         </section>
     </main>
@@ -285,6 +154,7 @@
                 <div class="form-group">
                     <label for="login-password">密碼</label>
                     <input type="password" id="login-password" placeholder="會員登入可留空，管理者請輸入密碼">
+                    <small style="color: #6c757d; font-size: 12px;">會員登入：輸入 Email 或電話，密碼留空<br>管理者登入：輸入帳號和密碼</small>
                 </div>
                 <button type="submit" class="submit-btn">登入</button>
                 <p class="form-footer">還不是會員？<a href="#" onclick="closeLoginModal();showRegisterModal()">立即註冊</a></p>
@@ -321,6 +191,54 @@
         </div>
     </div>
 
+    <!-- 會員中心 -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>會員中心</h2>
+                <button class="close-btn" onclick="closeProfileModal()">✕</button>
+            </div>
+            <div id="profile-content"></div>
+        </div>
+    </div>
+
+    <!-- 訂單查詢 -->
+    <div class="modal" id="order-search-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>訂單查詢</h2>
+                <button class="close-btn" onclick="closeOrderSearchModal()">✕</button>
+            </div>
+            <form onsubmit="searchOrder(event)">
+                <div class="form-group">
+                    <label>查詢方式</label>
+                    <select id="search-type">
+                        <option value="orderNumber">訂單編號</option>
+                        <option value="phone">電話</option>
+                        <option value="email">Email</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>輸入查詢資料</label>
+                    <input type="text" id="search-value" required>
+                </div>
+                <button type="submit" class="submit-btn">查詢</button>
+            </form>
+            <div id="search-results"></div>
+        </div>
+    </div>
+
+    <!-- 訂單詳情 -->
+    <div class="modal" id="order-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>訂單詳情</h2>
+                <button class="close-btn" onclick="closeOrderDetailModal()">✕</button>
+            </div>
+            <div id="order-detail-content"></div>
+        </div>
+    </div>
+
     <!-- 優惠券列表 -->
     <div class="modal" id="coupons-modal">
         <div class="modal-content">
@@ -332,7 +250,42 @@
         </div>
     </div>
 
-    <!-- 管理者面板 (保留完整) -->
+    <!-- 庫存管理（管理員） -->
+    <div class="modal" id="inventory-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>庫存管理</h2>
+                <button class="close-btn" onclick="closeInventoryModal()">✕</button>
+            </div>
+            <div id="inventory-content"></div>
+        </div>
+    </div>
+
+    <!-- 新增評價 -->
+    <div class="modal" id="add-review-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>撰寫評價</h2>
+                <button class="close-btn" onclick="closeAddReviewModal()">✕</button>
+            </div>
+            <form id="add-review-form" onsubmit="submitReview(event)">
+                <input type="hidden" id="review-product-id">
+                <div class="form-group">
+                    <label>評分</label>
+                    <input type="range" id="review-rating" min="1" max="5" value="5"
+                           oninput="updateRatingStars(this.value)">
+                    <div id="rating-display" class="rating-display">★★★★★</div>
+                </div>
+                <div class="form-group">
+                    <label for="review-comment">評價內容</label>
+                    <textarea id="review-comment" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">送出評價</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理者面板 -->
     <div class="modal" id="admin-panel-modal">
         <div class="modal-content">
             <div class="admin-header-bar">
@@ -361,20 +314,33 @@
                     </div>
                 </div>
                 <div class="admin-content">
-                    <div id="admin-dashboard" class="admin-tab-content" style="display: block;"></div>
-                    <div id="admin-security" class="admin-tab-content"></div>
-                    <div id="admin-products" class="admin-tab-content"></div>
-                    <div id="admin-orders" class="admin-tab-content"></div>
+                    <div id="admin-dashboard" class="admin-tab-content" style="display: block;">
+                        <!-- 儀表板內容 -->
+                    </div>
+                    <div id="admin-security" class="admin-tab-content">
+                        <!-- 安全性設定內容 -->
+                    </div>
+                    <div id="admin-products" class="admin-tab-content">
+                        <!-- 商品管理內容 -->
+                    </div>
+                    <div id="admin-orders" class="admin-tab-content">
+                        <!-- 訂單管理內容 -->
+                    </div>
                     <div id="admin-admins" class="admin-tab-content">
+                        <!-- 管理員管理內容 -->
                         <div class="admin-section">
                             <div class="section-header">
                                 <h3>👥 管理員帳號管理</h3>
                                 <button onclick="showAddAdminForm()" class="add-admin-btn" id="add-admin-btn">➕ 新增管理員</button>
                             </div>
-                            <div id="admins-list" class="admins-list"></div>
+                            <div id="admins-list" class="admins-list">
+                                <!-- 管理員列表會由 JavaScript 動態生成 -->
+                            </div>
                         </div>
                     </div>
-                    <div id="admin-logs" class="admin-tab-content"></div>
+                    <div id="admin-logs" class="admin-tab-content">
+                        <!-- 安全日誌內容 -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -460,21 +426,25 @@
             </div>
             <form onsubmit="submitAdminForm(event)">
                 <input type="hidden" id="edit-admin-username">
+
                 <div class="form-group">
                     <label>帳號 *</label>
                     <input type="text" id="admin-form-username" placeholder="請輸入帳號" required>
                     <small>登入時使用的帳號名稱</small>
                 </div>
+
                 <div class="form-group">
                     <label>顯示名稱 *</label>
                     <input type="text" id="admin-form-displayname" placeholder="請輸入顯示名稱" required>
                     <small>在系統中顯示的名稱</small>
                 </div>
+
                 <div class="form-group">
                     <label id="admin-form-password-label">密碼 *</label>
                     <input type="password" id="admin-form-password" placeholder="請輸入密碼">
                     <small id="admin-form-password-hint">至少 6 個字元</small>
                 </div>
+
                 <div class="form-group">
                     <label>權限設定</label>
                     <div class="permissions-grid">
@@ -516,6 +486,7 @@
                         <button type="button" onclick="clearAllPermissions()" class="small-btn">清除</button>
                     </div>
                 </div>
+
                 <button type="submit" class="submit-btn" id="admin-form-submit">➕ 新增管理員</button>
             </form>
         </div>
@@ -529,13 +500,14 @@
     <script src="member.js"></script>
     <script src="order-tracking.js"></script>
     <script src="coupon.js"></script>
+    <script src="inventory.js"></script>
     <script src="payment.js"></script>
+    <script src="reviews.js"></script>
     <script src="recommendations.js"></script>
     <script src="permission-system.js"></script>
     <script src="admin-system.js"></script>
     <script src="admin-management.js"></script>
     <script src="admin-panel.js"></script>
     <script src="site-config.js"></script>
-    <script src="common.js"></script>
 </body>
 </html>

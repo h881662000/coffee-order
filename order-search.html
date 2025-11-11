@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訂單查詢 - DiDo咖啡</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-extended.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="elegant-effects.css">
+    <style>
+        /* 訂單查詢頁面專用樣式 */
+        .order-search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 60vh;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #3d2817;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .search-form {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+        }
+
+        .search-results {
+            margin-top: 30px;
+        }
+
+        .result-message {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .result-message.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .result-message.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .order-details {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .order-info-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .order-info-section:last-child {
+            border-bottom: none;
+        }
+
+        .order-info-section h3 {
+            color: #3d2817;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 8px 0;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #666;
+            min-width: 100px;
+        }
+
+        .info-value {
+            color: #3d2817;
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .order-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .order-status.confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .order-status.shipping {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-status.completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .order-status.cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-total-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #6F4E37;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #6F4E37;
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                padding: 24px;
+            }
+
+            .order-details {
+                padding: 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <!-- 導航會由 common.js 生成 -->
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="order-search-container">
+            <div class="page-header">
+                <h1>🔍 訂單查詢</h1>
+                <p>輸入訂單編號、電話或 Email 查詢訂單狀態</p>
+            </div>
+
+            <div class="search-form">
+                <form onsubmit="searchOrder(event)">
+                    <div class="form-group">
+                        <label>查詢方式</label>
+                        <select id="search-type" class="form-control">
+                            <option value="orderNumber">訂單編號</option>
+                            <option value="phone">電話</option>
+                            <option value="email">Email</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>輸入查詢資料</label>
+                        <input type="text" id="search-value" class="form-control"
+                               placeholder="請輸入查詢資料" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">查詢訂單</button>
+                </form>
+            </div>
+
+            <div id="search-results" class="search-results">
+                <!-- 查詢結果會顯示在這裡 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 會員登入 -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>登入</h2>
+                <button class="close-btn" onclick="closeLoginModal()">✕</button>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-account">帳號 / Email / 電話 *</label>
+                    <input type="text" id="login-account" placeholder="請輸入帳號、Email 或電話" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密碼</label>
+                    <input type="password" id="login-password" placeholder="會員登入可留空，管理者請輸入密碼">
+                </div>
+                <button type="submit" class="submit-btn">登入</button>
+                <p class="form-footer">還不是會員？<a href="#" onclick="closeLoginModal();showRegisterModal()">立即註冊</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 會員註冊 -->
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>會員註冊</h2>
+                <button class="close-btn" onclick="closeRegisterModal()">✕</button>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-name">姓名 *</label>
+                    <input type="text" id="register-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email *</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">電話 *</label>
+                    <input type="tel" id="register-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-address">地址</label>
+                    <textarea id="register-address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">註冊</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理者面板 -->
+    <div class="modal" id="admin-panel-modal">
+        <div class="modal-content">
+            <div class="admin-header-bar">
+                <h2>🛠️ 管理者面板</h2>
+                <button class="admin-logout-btn" onclick="adminLogout()">登出</button>
+            </div>
+            <div class="admin-panel-container">
+                <div class="admin-sidebar">
+                    <div class="admin-tab active" onclick="switchAdminTab('dashboard')">
+                        <span class="admin-tab-icon">📊</span> 儀表板
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('security')">
+                        <span class="admin-tab-icon">🔒</span> 安全性設定
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('products')">
+                        <span class="admin-tab-icon">📦</span> 商品管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('orders')">
+                        <span class="admin-tab-icon">📋</span> 訂單管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('admins')" id="admin-tab-admins">
+                        <span class="admin-tab-icon">👥</span> 管理員管理
+                    </div>
+                    <div class="admin-tab" onclick="switchAdminTab('logs')">
+                        <span class="admin-tab-icon">📜</span> 安全日誌
+                    </div>
+                </div>
+                <div class="admin-content">
+                    <div id="admin-dashboard" class="admin-tab-content" style="display: block;"></div>
+                    <div id="admin-security" class="admin-tab-content"></div>
+                    <div id="admin-products" class="admin-tab-content"></div>
+                    <div id="admin-orders" class="admin-tab-content"></div>
+                    <div id="admin-admins" class="admin-tab-content">
+                        <div class="admin-section">
+                            <div class="section-header">
+                                <h3>👥 管理員帳號管理</h3>
+                                <button onclick="showAddAdminForm()" class="add-admin-btn" id="add-admin-btn">➕ 新增管理員</button>
+                            </div>
+                            <div id="admins-list" class="admins-list"></div>
+                        </div>
+                    </div>
+                    <div id="admin-logs" class="admin-tab-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增商品 Modal -->
+    <div class="modal" id="add-product-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ 新增商品</h2>
+                <button class="close-btn" onclick="closeAddProductForm()">✕</button>
+            </div>
+            <form onsubmit="submitAddProduct(event)">
+                <div class="form-group">
+                    <label>商品 ID *</label>
+                    <input type="text" id="new-product-id" placeholder="例如：E" required>
+                </div>
+                <div class="form-group">
+                    <label>商品名稱 *</label>
+                    <input type="text" id="new-product-name" required>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="new-product-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>商品圖片</label>
+                    <div class="image-preview" id="new-product-preview"><div style="font-size: 48px;">☕</div></div>
+                    <div class="image-upload-options">
+                        <label class="upload-tab active" onclick="switchNewProductUploadMode('file')">
+                            <input type="radio" name="new-upload-mode" value="file" checked> 上傳圖片
+                        </label>
+                        <label class="upload-tab" onclick="switchNewProductUploadMode('url')">
+                            <input type="radio" name="new-upload-mode" value="url"> 圖片網址
+                        </label>
+                    </div>
+                    <div id="new-upload-file" class="upload-section active">
+                        <input type="file" id="new-image-file" accept="image/*" onchange="previewNewProductImage(event)">
+                    </div>
+                    <div id="new-upload-url" class="upload-section" style="display:none;">
+                        <input type="url" id="new-image-url" onchange="previewNewProductImageURL(event)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>120g 價格（NT$）*</label>
+                        <input type="number" id="new-product-price120" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>260g 價格（NT$）*</label>
+                        <input type="number" id="new-product-price260" required min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>產地</label>
+                    <input type="text" id="new-product-origin">
+                </div>
+                <div class="form-group">
+                    <label>烘焙度</label>
+                    <input type="text" id="new-product-roast">
+                </div>
+                <div class="form-group">
+                    <label>風味</label>
+                    <input type="text" id="new-product-flavor">
+                </div>
+                <button type="submit" class="submit-btn">➕ 新增商品</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 新增/編輯管理員 Modal -->
+    <div class="modal" id="admin-form-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="admin-form-title">➕ 新增管理員</h2>
+                <button class="close-btn" onclick="closeAdminForm()">✕</button>
+            </div>
+            <form onsubmit="submitAdminForm(event)">
+                <input type="hidden" id="edit-admin-username">
+                <div class="form-group">
+                    <label>帳號 *</label>
+                    <input type="text" id="admin-form-username" required>
+                </div>
+                <div class="form-group">
+                    <label>顯示名稱 *</label>
+                    <input type="text" id="admin-form-displayname" required>
+                </div>
+                <div class="form-group">
+                    <label id="admin-form-password-label">密碼 *</label>
+                    <input type="password" id="admin-form-password">
+                </div>
+                <div class="form-group">
+                    <label>權限設定</label>
+                    <div class="permissions-grid">
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageProducts"><span>管理商品</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageImages"><span>管理圖片</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageOrders"><span>管理訂單</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageMembers"><span>管理會員</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageSecurity"><span>管理安全設定</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-manageAdmins"><span>管理管理員帳號</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-viewStats"><span>查看統計資料</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="perm-viewLogs"><span>查看日誌</span>
+                        </label>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button type="button" onclick="selectAllPermissions()" class="small-btn">全選</button>
+                        <button type="button" onclick="clearAllPermissions()" class="small-btn">清除</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" id="admin-form-submit">➕ 新增管理員</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript 檔案 -->
+    <script src="products.js"></script>
+    <script src="security.js"></script>
+    <script src="member.js"></script>
+    <script src="permission-system.js"></script>
+    <script src="admin-system.js"></script>
+    <script src="admin-management.js"></script>
+    <script src="admin-panel.js"></script>
+    <script src="site-config.js"></script>
+    <script src="common.js"></script>
+
+    <script>
+        // 訂單查詢邏輯
+        function searchOrder(event) {
+            event.preventDefault();
+
+            const searchType = document.getElementById('search-type').value;
+            const searchValue = document.getElementById('search-value').value.trim();
+            const resultsContainer = document.getElementById('search-results');
+
+            if (!searchValue) {
+                showError('請輸入查詢資料');
+                return;
+            }
+
+            // 從 localStorage 獲取所有訂單
+            const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+            let matchingOrders = [];
+
+            // 根據查詢方式搜尋
+            switch (searchType) {
+                case 'orderNumber':
+                    matchingOrders = allOrders.filter(order =>
+                        order.orderNumber.toLowerCase() === searchValue.toLowerCase()
+                    );
+                    break;
+                case 'phone':
+                    matchingOrders = allOrders.filter(order =>
+                        order.customerPhone === searchValue
+                    );
+                    break;
+                case 'email':
+                    matchingOrders = allOrders.filter(order =>
+                        order.customerEmail && order.customerEmail.toLowerCase() === searchValue.toLowerCase()
+                    );
+                    break;
+            }
+
+            // 顯示結果
+            if (matchingOrders.length === 0) {
+                showError('找不到符合條件的訂單');
+            } else if (matchingOrders.length === 1) {
+                showOrderDetails(matchingOrders[0]);
+            } else {
+                showMultipleOrders(matchingOrders);
+            }
+        }
+
+        function showError(message) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = `
+                <div class="result-message error">
+                    <h3>❌ 查詢失敗</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showOrderDetails(order) {
+            const resultsContainer = document.getElementById('search-results');
+
+            const statusText = {
+                'pending': '待確認',
+                'confirmed': '已確認',
+                'shipping': '配送中',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+
+            resultsContainer.innerHTML = `
+                <div class="order-details">
+                    <div class="order-info-section">
+                        <h3>📋 訂單資訊</h3>
+                        <div class="info-row">
+                            <span class="info-label">訂單編號：</span>
+                            <span class="info-value">${order.orderNumber}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">訂單日期：</span>
+                            <span class="info-value">${new Date(order.orderDate).toLocaleString('zh-TW')}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">訂單狀態：</span>
+                            <span class="order-status ${order.status || 'pending'}">
+                                ${statusText[order.status] || '待確認'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="order-info-section">
+                        <h3>👤 訂購人資訊</h3>
+                        <div class="info-row">
+                            <span class="info-label">姓名：</span>
+                            <span class="info-value">${order.customerName}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">電話：</span>
+                            <span class="info-value">${order.customerPhone}</span>
+                        </div>
+                        ${order.customerEmail ? `
+                            <div class="info-row">
+                                <span class="info-label">Email：</span>
+                                <span class="info-value">${order.customerEmail}</span>
+                            </div>
+                        ` : ''}
+                        <div class="info-row">
+                            <span class="info-label">地址：</span>
+                            <span class="info-value">${order.customerAddress}</span>
+                        </div>
+                        ${order.customerNote ? `
+                            <div class="info-row">
+                                <span class="info-label">備註：</span>
+                                <span class="info-value">${order.customerNote}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="order-info-section">
+                        <h3>📦 訂單明細</h3>
+                        ${order.items.map(item => `
+                            <div class="order-item-row">
+                                <div>
+                                    <strong>${item.productName}</strong>
+                                    <span style="color: #999; margin-left: 10px;">${item.weight}</span>
+                                </div>
+                                <div>
+                                    <span>NT$ ${item.price} × ${item.quantity}</span>
+                                    <strong style="margin-left: 15px;">NT$ ${item.price * item.quantity}</strong>
+                                </div>
+                            </div>
+                        `).join('')}
+
+                        <div class="order-total-section">
+                            <div class="order-total">
+                                <span>總金額</span>
+                                <span>NT$ ${order.totalPrice}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showMultipleOrders(orders) {
+            const resultsContainer = document.getElementById('search-results');
+
+            const statusText = {
+                'pending': '待確認',
+                'confirmed': '已確認',
+                'shipping': '配送中',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+
+            resultsContainer.innerHTML = `
+                <div class="result-message success">
+                    <h3>✓ 找到 ${orders.length} 筆訂單</h3>
+                    <p>請選擇要查看的訂單</p>
+                </div>
+                ${orders.map(order => `
+                    <div class="order-details" style="margin-top: 20px; cursor: pointer;"
+                         onclick="showOrderDetails(${JSON.stringify(order).replace(/"/g, '&quot;')})">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>訂單編號：${order.orderNumber}</strong>
+                                <p style="color: #999; margin: 5px 0 0 0;">
+                                    ${new Date(order.orderDate).toLocaleDateString('zh-TW')}
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="order-status ${order.status || 'pending'}">
+                                    ${statusText[order.status] || '待確認'}
+                                </span>
+                                <p style="margin: 5px 0 0 0; font-weight: 600; color: #6F4E37;">
+                                    NT$ ${order.totalPrice}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+    </script>
+</body>
+</html>

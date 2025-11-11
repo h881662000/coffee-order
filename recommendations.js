@@ -1,8 +1,23 @@
 // 產品推薦系統
 
 const RecommendationSystem = {
+    // 取得最新的商品資料
+    getCurrentProducts() {
+        // 從 localStorage 重新載入商品資料
+        const savedProducts = localStorage.getItem('products_config');
+        if (savedProducts) {
+            try {
+                return JSON.parse(savedProducts);
+            } catch (e) {
+                console.error('載入商品資料失敗', e);
+            }
+        }
+        return typeof products !== 'undefined' ? products : [];
+    },
+
     // 基於購買歷史的推薦
     getRecommendationsForMember(memberId, limit = 4) {
+        const currentProducts = this.getCurrentProducts();
         const orders = OrderTracking.getMemberOrders();
         if (orders.length === 0) {
             return this.getPopularProducts(limit);
@@ -17,7 +32,7 @@ const RecommendationSystem = {
         });
 
         // 推薦未購買過的產品
-        const recommendations = products.filter(p =>
+        const recommendations = currentProducts.filter(p =>
             !purchasedProducts.has(p.id)
         );
 
@@ -31,8 +46,10 @@ const RecommendationSystem = {
 
     // 取得熱門產品
     getPopularProducts(limit = 4) {
+        const currentProducts = this.getCurrentProducts();
+
         // 基於評分和評價數量計算熱門度
-        const productsWithScore = products.map(product => {
+        const productsWithScore = currentProducts.map(product => {
             const avgRating = parseFloat(ReviewSystem.getAverageRating(product.id)) || 0;
             const reviewCount = ReviewSystem.getProductReviews(product.id).length;
 
@@ -53,21 +70,27 @@ const RecommendationSystem = {
 
     // 取得同類型產品推薦（查看產品時）
     getSimilarProducts(productId, limit = 3) {
+        const currentProducts = this.getCurrentProducts();
+
         // 排除當前產品
-        return products
+        return currentProducts
             .filter(p => p.id !== productId)
             .slice(0, limit);
     },
 
     // 取得新品推薦
     getNewProducts(limit = 4) {
+        const currentProducts = this.getCurrentProducts();
+
         // 這裡可以根據產品的 createdAt 字段排序
         // 目前簡單返回前幾個產品
-        return products.slice(0, limit);
+        return currentProducts.slice(0, limit);
     },
 
     // 基於購物車的推薦（經常一起購買）
     getFrequentlyBoughtTogether(cartItems) {
+        const currentProducts = this.getCurrentProducts();
+
         if (cartItems.length === 0) {
             return [];
         }
@@ -112,13 +135,15 @@ const RecommendationSystem = {
         return Array.from(recommendations.entries())
             .sort((a, b) => b[1] - a[1])
             .slice(0, 3)
-            .map(([productId]) => products.find(p => p.id === productId))
+            .map(([productId]) => currentProducts.find(p => p.id === productId))
             .filter(p => p);
     },
 
     // 基於評分的推薦
     getTopRatedProducts(limit = 4) {
-        const productsWithRating = products.map(product => {
+        const currentProducts = this.getCurrentProducts();
+
+        const productsWithRating = currentProducts.map(product => {
             const avgRating = parseFloat(ReviewSystem.getAverageRating(product.id)) || 0;
             const reviewCount = ReviewSystem.getProductReviews(product.id).length;
 
@@ -167,9 +192,25 @@ function renderRecommendations(recommendations, title = '推薦商品') {
         const avgRating = ReviewSystem.getAverageRating(product.id);
         const reviewCount = ReviewSystem.getProductReviews(product.id).length;
 
+        // 處理圖片顯示
+        let imageHTML;
+        if (typeof ImageSystem !== 'undefined' && product.image) {
+            const imageURL = ImageSystem.getImageURL(product.image);
+            if (imageURL) {
+                // 使用實際圖片
+                imageHTML = `<img src="${imageURL}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                // 使用 emoji 或文字
+                imageHTML = product.image || '☕';
+            }
+        } else {
+            // 預設使用 emoji
+            imageHTML = product.image || '☕';
+        }
+
         html += `
             <div class="recommendation-card">
-                <div class="product-image">${product.image}</div>
+                <div class="product-image">${imageHTML}</div>
                 <div class="product-name">${product.name}</div>
                 ${reviewCount > 0 ? `
                     <div class="product-rating">
@@ -178,6 +219,9 @@ function renderRecommendations(recommendations, title = '推薦商品') {
                     </div>
                 ` : ''}
                 <div class="product-price">NT$ ${product.prices['120g']}</div>
+                <button onclick="quickAddToCart('${product.id}', '120g')" class="quick-add-btn">
+                    快速加入
+                </button>
             </div>
         `;
     });
@@ -220,6 +264,12 @@ function showCartRecommendations() {
     } else {
         container.style.display = 'none';
     }
+}
+
+// 快速加入購物車
+function quickAddToCart(productId, size) {
+    addToCart(productId, size);
+    alert('已加入購物車！');
 }
 
 // 在產品詳情頁顯示相似產品

@@ -1,0 +1,366 @@
+/* 優雅簡潔的背景效果 - 參考高端甜點網站風格 */
+
+/* 主體背景 - 簡潔漸層 */
+body {
+    background: linear-gradient(135deg, #fdfbf7 0%, #f5f0e8 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 微妙的背景光暈效果 */
+body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle at 30% 20%,
+        rgba(139, 111, 71, 0.03) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
+    z-index: 0;
+    animation: subtleRotate 60s linear infinite;
+}
+
+@keyframes subtleRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Header 優化 - 磨砂玻璃效果 */
+header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* 導航列優化 */
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-link {
+    color: #3d2817;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: rgba(111, 78, 55, 0.1);
+    color: #6F4E37;
+}
+
+.nav-link.active {
+    background: #6F4E37;
+    color: white;
+}
+
+/* 會員下拉選單 */
+.member-dropdown {
+    position: relative;
+}
+
+.member-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    min-width: 180px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.member-dropdown:hover .member-dropdown-content {
+    display: block;
+}
+
+.member-dropdown-content a {
+    display: block;
+    padding: 12px 20px;
+    color: #3d2817;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.member-dropdown-content a:hover {
+    background: #f8f8f8;
+    color: #6F4E37;
+}
+
+/* 標題文字優化 */
+header h1 {
+    color: #3d2817;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+/* 標題懸停效果 */
+header h1:hover {
+    transform: translateY(-2px);
+    text-shadow: 0 4px 8px rgba(111, 78, 55, 0.1);
+}
+
+/* 確保主要內容在效果之上 */
+main {
+    position: relative;
+    z-index: 1;
+}
+
+/* 按鈕優化 - 清晰可見 */
+.nav-btn,
+.member-btn {
+    background: #6F4E37;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(111, 78, 55, 0.2);
+}
+
+.nav-btn:hover,
+.member-btn:hover {
+    background: #5a3d2a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(111, 78, 55, 0.3);
+}
+
+.nav-btn:active,
+.member-btn:active {
+    transform: translateY(0);
+}
+
+/* 購物車圖示優化 */
+.cart-icon {
+    background: #6F4E37;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(111, 78, 55, 0.2);
+}
+
+.cart-icon:hover {
+    background: #5a3d2a;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(111, 78, 55, 0.3);
+}
+
+/* 商品卡片優化 */
+.product-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(111,78,55,0.02) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(111, 78, 55, 0.15);
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+/* 推薦區塊優化 */
+.recommendation-card {
+    background: white;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.recommendation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(111, 78, 55, 0.12);
+}
+
+/* 按鈕統一樣式 */
+.add-to-cart-btn,
+.quick-add-btn,
+.checkout-btn,
+.submit-btn {
+    background: #6F4E37;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(111, 78, 55, 0.2);
+}
+
+.add-to-cart-btn:hover,
+.quick-add-btn:hover,
+.checkout-btn:hover,
+.submit-btn:hover {
+    background: #5a3d2a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(111, 78, 55, 0.3);
+}
+
+/* 模態視窗優化 */
+.modal {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 平滑滾動 */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 區塊標題優化 */
+h2, h3 {
+    color: #3d2817;
+    font-weight: 600;
+    position: relative;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #6F4E37, transparent);
+    border-radius: 2px;
+}
+
+/* 輸入框優化 */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    border: 2px solid #e8dfd5;
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #6F4E37;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(111, 78, 55, 0.1);
+}
+
+/* 頁面載入動畫 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.container > * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .nav-btn,
+    .member-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+/* 減少動畫效果（針對偏好減少動作的使用者） */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    body::before {
+        animation: none;
+    }
+}

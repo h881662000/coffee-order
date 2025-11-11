@@ -1,0 +1,12 @@
+需要在這些頁面添加的內容：
+
+1. JavaScript 檔案（在 </body> 之前）：
+   <script src="admin-management.js"></script>
+   <script src="admin-panel.js"></script>
+
+2. 管理面板 Modal HTML（複製完整的管理面板）
+
+頁面清單：
+- my-orders.html
+- order-search.html  
+- profile.html

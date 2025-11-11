@@ -7,11 +7,54 @@ function showAdminPanel() {
         return;
     }
 
+    // 更新標籤顯示（根據權限）
+    updateAllAdminTabsVisibility();
+    if (typeof updateAdminTabVisibility === 'function') {
+        updateAdminTabVisibility();
+    }
+
     const modal = document.getElementById('admin-panel-modal');
     if (modal) {
         modal.classList.add('active');
         // 預設顯示儀表板
         showAdminDashboard();
+    }
+}
+
+// 更新所有管理面板標籤的可見性（根據權限）
+function updateAllAdminTabsVisibility() {
+    if (!AdminSystem.isLoggedIn()) return;
+
+    // 儀表板 - VIEW_STATS
+    const dashboardTab = document.querySelector('[onclick="switchAdminTab(\'dashboard\')"]');
+    if (dashboardTab) {
+        dashboardTab.style.display = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.VIEW_STATS) ? 'block' : 'none';
+    }
+
+    // 安全性設定 - MANAGE_SECURITY
+    const securityTab = document.querySelector('[onclick="switchAdminTab(\'security\')"]');
+    if (securityTab) {
+        securityTab.style.display = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_SECURITY) ? 'block' : 'none';
+    }
+
+    // 商品管理 - MANAGE_PRODUCTS 或 MANAGE_IMAGES（至少一個）
+    const productsTab = document.querySelector('[onclick="switchAdminTab(\'products\')"]');
+    if (productsTab) {
+        const canAccessProducts = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_PRODUCTS) ||
+                                   AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_IMAGES);
+        productsTab.style.display = canAccessProducts ? 'block' : 'none';
+    }
+
+    // 訂單管理 - MANAGE_ORDERS
+    const ordersTab = document.querySelector('[onclick="switchAdminTab(\'orders\')"]');
+    if (ordersTab) {
+        ordersTab.style.display = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_ORDERS) ? 'block' : 'none';
+    }
+
+    // 安全日誌 - VIEW_LOGS
+    const logsTab = document.querySelector('[onclick="switchAdminTab(\'logs\')"]');
+    if (logsTab) {
+        logsTab.style.display = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.VIEW_LOGS) ? 'block' : 'none';
     }
 }
 
@@ -57,20 +100,12 @@ function switchAdminTab(tabName) {
             showProductSettings();
             break;
         case 'orders':
-            if (typeof showOrderManagementWithDelete === 'function') {
-                showOrderManagementWithDelete();
-            } else {
-                showOrderManagement();
+            showOrderManagement();
+            break;
+        case 'admins':
+            if (typeof renderAdminsList === 'function') {
+                renderAdminsList();
             }
-            break;
-        case 'members':
-            showMemberManagement();
-            break;
-        case 'reports':
-            showReportsAnalysis();
-            break;
-        case 'costs':
-            showCostManagement();
             break;
         case 'logs':
             showSecurityLogs();
@@ -323,13 +358,30 @@ function showProductSettings() {
 
     const products = AdminSystem.getProducts();
 
+    // 檢查權限
+    const canManageProducts = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_PRODUCTS);
+    const canManageImages = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_IMAGES);
+
     let productsHtml = '';
     products.forEach(product => {
+        // 取得圖片顯示
+        const imageURL = typeof ImageSystem !== 'undefined' && product.image
+            ? ImageSystem.getImageURL(product.image)
+            : null;
+        const imageDisplay = imageURL
+            ? `<img src="${imageURL}" alt="${product.name}" style="max-width: 150px; max-height: 150px; border-radius: 8px;">`
+            : `<div style="font-size: 48px;">${product.image || '☕'}</div>`;
+
+        // 刪除按鈕只有在擁有 MANAGE_PRODUCTS 權限時才顯示
+        const deleteButtonHTML = canManageProducts
+            ? `<button class="btn-danger btn-small" onclick="deleteProductConfirm('${product.id}')">🗑️ 刪除</button>`
+            : '';
+
         productsHtml += `
             <div class="product-edit-card">
                 <div class="product-edit-header">
                     <h4>${product.name}</h4>
-                    <button class="btn-danger btn-small" onclick="deleteProductConfirm('${product.id}')">🗑️ 刪除</button>
+                    ${deleteButtonHTML}
                 </div>
                 <form onsubmit="updateProductInfo(event, '${product.id}')">
                     <div class="form-group">
@@ -343,6 +395,28 @@ function showProductSettings() {
                     <div class="form-group">
                         <label>描述</label>
                         <textarea id="description-${product.id}" rows="3">${product.description}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>商品圖片</label>
+                        <div class="image-preview" id="preview-${product.id}">
+                            ${imageDisplay}
+                        </div>
+                        <div class="image-upload-options">
+                            <label class="upload-tab active" onclick="switchUploadMode('${product.id}', 'file')">
+                                <input type="radio" name="upload-mode-${product.id}" value="file" checked> 上傳圖片
+                            </label>
+                            <label class="upload-tab" onclick="switchUploadMode('${product.id}', 'url')">
+                                <input type="radio" name="upload-mode-${product.id}" value="url"> 圖片網址
+                            </label>
+                        </div>
+                        <div id="upload-file-${product.id}" class="upload-section active">
+                            <input type="file" id="image-file-${product.id}" accept="image/*" onchange="previewImage(event, '${product.id}')">
+                            <small>支援 JPG、PNG、GIF、WebP，最大 5MB</small>
+                        </div>
+                        <div id="upload-url-${product.id}" class="upload-section" style="display:none;">
+                            <input type="url" id="image-url-${product.id}" placeholder="https://example.com/image.jpg" onchange="previewImageURL(event, '${product.id}')">
+                            <small>請輸入圖片網址</small>
+                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -373,21 +447,28 @@ function showProductSettings() {
         `;
     });
 
+    // 檢查新增商品權限
+    const canAddProduct = AdminSystem.hasPermission(PermissionSystem.PERMISSIONS.MANAGE_PRODUCTS);
+    const addButtonHTML = canAddProduct
+        ? '<button class="btn-primary" onclick="showAddProductForm()">➕ 新增商品</button>'
+        : '';
+
     container.innerHTML = `
         <div class="products-management">
             <div class="section-header">
                 <h3>📦 商品管理</h3>
-                <button class="btn-primary" onclick="showAddProductForm()">➕ 新增商品</button>
+                ${addButtonHTML}
             </div>
+            ${products.length === 0 ? '<p class="empty-message">目前沒有商品</p>' : `
             <div class="products-grid">
                 ${productsHtml}
-            </div>
+            </div>`}
         </div>
     `;
 }
 
 // 更新商品資訊
-function updateProductInfo(event, productId) {
+async function updateProductInfo(event, productId) {
     event.preventDefault();
 
     const updates = {
@@ -402,21 +483,66 @@ function updateProductInfo(event, productId) {
         flavor: document.getElementById(`flavor-${productId}`).value
     };
 
-    if (AdminSystem.updateProduct(productId, updates)) {
+    // 處理圖片上傳
+    const uploadMode = document.querySelector(`input[name="upload-mode-${productId}"]:checked`)?.value;
+    if (uploadMode === 'file') {
+        const fileInput = document.getElementById(`image-file-${productId}`);
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const result = await ImageSystem.uploadImage(fileInput.files[0], ImageSystem.STORAGE_TYPE.BASE64);
+            if (result.success) {
+                updates.image = result.data;
+            } else {
+                alert('❌ 圖片上傳失敗: ' + result.message);
+                return;
+            }
+        }
+    } else if (uploadMode === 'url') {
+        const urlInput = document.getElementById(`image-url-${productId}`);
+        if (urlInput && urlInput.value.trim()) {
+            const result = await ImageSystem.uploadImage(urlInput.value.trim(), ImageSystem.STORAGE_TYPE.URL);
+            if (result.success) {
+                updates.image = result.data;
+                if (result.warning) {
+                    console.warn(result.warning);
+                }
+            } else {
+                alert('❌ 圖片網址無效: ' + result.message);
+                return;
+            }
+        }
+    }
+
+    const result = AdminSystem.updateProduct(productId, updates);
+    if (result.success) {
         alert('✅ 商品資訊已更新');
+        showProductSettings();
+
+        // 更新推薦區域
+        if (typeof showHomeRecommendations === 'function') {
+            showHomeRecommendations();
+        }
     } else {
-        alert('❌ 更新失敗');
+        alert('❌ 更新失敗: ' + result.message);
     }
 }
 
 // 確認刪除商品
 function deleteProductConfirm(productId) {
-    if (confirm(`確定要刪除商品 ${productId} 嗎？\n此操作無法復原！`)) {
-        if (AdminSystem.deleteProduct(productId)) {
-            alert('✅ 商品已刪除');
+    const product = products.find(p => p.id === productId);
+    const productName = product ? product.name : productId;
+
+    if (confirm(`確定要刪除商品「${productName}」嗎？\n此操作無法復原！`)) {
+        const result = AdminSystem.deleteProduct(productId);
+        if (result.success) {
+            alert('✅ ' + result.message);
             showProductSettings();
+
+            // 更新推薦區域
+            if (typeof showHomeRecommendations === 'function') {
+                showHomeRecommendations();
+            }
         } else {
-            alert('❌ 刪除失敗');
+            alert('❌ ' + result.message);
         }
     }
 }
@@ -438,29 +564,86 @@ function closeAddProductForm() {
 }
 
 // 提交新增商品
-function submitAddProduct(event) {
+async function submitAddProduct(event) {
     event.preventDefault();
+
+    // 讀取動態價格規格
+    const pricesContainer = document.getElementById('new-product-prices-container');
+    const priceRows = pricesContainer.querySelectorAll('.price-row');
+    const prices = {};
+
+    for (const row of priceRows) {
+        const specName = row.querySelector('.spec-name').value.trim();
+        const specPrice = parseInt(row.querySelector('.spec-price').value);
+
+        if (specName && specPrice > 0) {
+            prices[specName] = specPrice;
+        }
+    }
+
+    if (Object.keys(prices).length === 0) {
+        alert('請至少添加一種商品規格');
+        return;
+    }
 
     const productData = {
         id: document.getElementById('new-product-id').value,
         name: document.getElementById('new-product-name').value,
         description: document.getElementById('new-product-description').value,
-        prices: {
-            '120g': parseInt(document.getElementById('new-product-price120').value),
-            '260g': parseInt(document.getElementById('new-product-price260').value)
-        },
+        prices: prices,
         origin: document.getElementById('new-product-origin').value,
         roast: document.getElementById('new-product-roast').value,
-        flavor: document.getElementById('new-product-flavor').value
+        flavor: document.getElementById('new-product-flavor').value,
+        image: '☕' // 預設emoji
     };
 
-    if (AdminSystem.addProduct(productData)) {
+    // 處理圖片上傳
+    const uploadMode = document.querySelector('input[name="new-upload-mode"]:checked')?.value;
+    if (uploadMode === 'file') {
+        const fileInput = document.getElementById('new-image-file');
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const result = await ImageSystem.uploadImage(fileInput.files[0], ImageSystem.STORAGE_TYPE.BASE64);
+            if (result.success) {
+                productData.image = result.data;
+            } else {
+                alert('❌ 圖片上傳失敗: ' + result.message);
+                return;
+            }
+        }
+    } else if (uploadMode === 'url') {
+        const urlInput = document.getElementById('new-image-url');
+        if (urlInput && urlInput.value.trim()) {
+            const result = await ImageSystem.uploadImage(urlInput.value.trim(), ImageSystem.STORAGE_TYPE.URL);
+            if (result.success) {
+                productData.image = result.data;
+                if (result.warning) {
+                    console.warn(result.warning);
+                }
+            } else {
+                alert('❌ 圖片網址無效: ' + result.message);
+                return;
+            }
+        }
+    }
+
+    const result = AdminSystem.addProduct(productData);
+    if (result.success) {
         alert('✅ 商品已新增');
         closeAddProductForm();
         showProductSettings();
         event.target.reset();
+        // 重置預覽
+        const preview = document.getElementById('new-product-preview');
+        if (preview) {
+            preview.innerHTML = '<div style="font-size: 48px;">☕</div>';
+        }
+
+        // 更新推薦區域
+        if (typeof showHomeRecommendations === 'function') {
+            showHomeRecommendations();
+        }
     } else {
-        alert('❌ 新增失敗：商品 ID 可能已存在');
+        alert('❌ 新增失敗：' + result.message);
     }
 }
 
@@ -578,5 +761,128 @@ function clearLogsConfirm() {
             alert('✅ 日誌已清除');
             showSecurityLogs();
         }
+    }
+}
+
+// 圖片上傳相關函數
+
+// 切換上傳模式（檔案 / 網址）
+function switchUploadMode(productId, mode) {
+    const fileSection = document.getElementById(`upload-file-${productId}`);
+    const urlSection = document.getElementById(`upload-url-${productId}`);
+    const fileTabs = document.querySelectorAll(`label.upload-tab`);
+
+    if (mode === 'file') {
+        fileSection.style.display = 'block';
+        urlSection.style.display = 'none';
+    } else {
+        fileSection.style.display = 'none';
+        urlSection.style.display = 'block';
+    }
+}
+
+// 預覽上傳的圖片檔案
+function previewImage(event, productId) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById(`preview-${productId}`);
+    if (!preview) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="預覽" style="max-width: 150px; max-height: 150px; border-radius: 8px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// 預覽圖片網址
+function previewImageURL(event, productId) {
+    const url = event.target.value.trim();
+    if (!url) return;
+
+    const preview = document.getElementById(`preview-${productId}`);
+    if (!preview) return;
+
+    preview.innerHTML = `<img src="${url}" alt="預覽" style="max-width: 150px; max-height: 150px; border-radius: 8px;" onerror="this.src=''; this.alt='無法載入圖片';">`;
+}
+
+// 新商品表單的圖片預覽（添加到新商品表單）
+function switchNewProductUploadMode(mode) {
+    const fileSection = document.getElementById('new-upload-file');
+    const urlSection = document.getElementById('new-upload-url');
+
+    if (mode === 'file') {
+        fileSection.style.display = 'block';
+        urlSection.style.display = 'none';
+    } else {
+        fileSection.style.display = 'none';
+        urlSection.style.display = 'block';
+    }
+}
+
+function previewNewProductImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById('new-product-preview');
+    if (!preview) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="預覽" style="max-width: 150px; max-height: 150px; border-radius: 8px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+function previewNewProductImageURL(event) {
+    const url = event.target.value.trim();
+    if (!url) return;
+
+    const preview = document.getElementById('new-product-preview');
+    if (!preview) return;
+
+    preview.innerHTML = `<img src="${url}" alt="預覽" style="max-width: 150px; max-height: 150px; border-radius: 8px;" onerror="this.src=''; this.alt='無法載入圖片';">`;
+}
+
+// 新增商品規格
+function addNewProductSpec() {
+    const container = document.getElementById('new-product-prices-container');
+    const priceRow = document.createElement('div');
+    priceRow.className = 'price-row';
+    priceRow.innerHTML = `
+        <input type="text" placeholder="規格名稱（如：120g）" class="spec-name" required>
+        <input type="number" placeholder="價格" class="spec-price" required min="0">
+        <button type="button" class="remove-spec-btn" onclick="removeNewProductSpec(this)">✕</button>
+    `;
+    container.appendChild(priceRow);
+    updateRemoveButtons();
+}
+
+// 移除商品規格
+function removeNewProductSpec(button) {
+    const container = document.getElementById('new-product-prices-container');
+    const rows = container.querySelectorAll('.price-row');
+
+    // 至少保留一個規格
+    if (rows.length > 1) {
+        button.closest('.price-row').remove();
+        updateRemoveButtons();
+    } else {
+        alert('至少需要保留一種商品規格');
+    }
+}
+
+// 更新移除按鈕的顯示狀態
+function updateRemoveButtons() {
+    const container = document.getElementById('new-product-prices-container');
+    const rows = container.querySelectorAll('.price-row');
+    const removeButtons = container.querySelectorAll('.remove-spec-btn');
+
+    // 如果只有一個規格，隱藏移除按鈕
+    if (rows.length === 1) {
+        removeButtons.forEach(btn => btn.style.display = 'none');
+    } else {
+        removeButtons.forEach(btn => btn.style.display = 'flex');
     }
 }

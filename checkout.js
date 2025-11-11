@@ -116,9 +116,6 @@ async function submitOrder(event) {
         paymentMethod: selectedPaymentMethod || 'COD'
     };
 
-    // 🔍 Debug: 顯示訂單資料（測試時使用）
-    console.log('📦 訂單資料：', JSON.stringify(orderData, null, 2));
-
     // 8. 檢測可疑訂單
     const suspiciousCheck = SecuritySystem.detectSuspiciousOrder(orderData);
     if (suspiciousCheck.isSuspicious) {
@@ -224,7 +221,7 @@ function generateOrderNumber() {
 // 提交到 Google Sheets
 async function submitToGoogleSheets(orderData) {
     // Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsfmnuBFP1cnhyOBdgG0MnH0MoL0RThKSwZgL7jUsmPx8EjFwWi5hPE8NeFrdDUeA/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzN7-4cb1esp6TW6B7Ykg5CWBO3o55sB7rGbGsBFwAdV77BWdslbd6-fYw8hGiVUFf0/exec';
 
     // 如果尚未設定 Google Apps Script URL，暫時儲存到 localStorage
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
@@ -234,12 +231,6 @@ async function submitToGoogleSheets(orderData) {
     }
 
     try {
-        // 🔍 Debug: 顯示實際送出的資料
-        console.log('🚀 準備送出訂單：');
-        console.log('📦 完整訂單資料：', JSON.stringify(orderData, null, 2));
-        console.log('🛒 商品清單：', orderData.items);
-        console.log('👤 客戶資料：', orderData.customer);
-
         // 實際提交到 Google Sheets
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',

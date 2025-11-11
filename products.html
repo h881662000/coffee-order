@@ -3,125 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DiDo咖啡</title>
+    <title>商品列表 - DiDo咖啡</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="styles-extended.css">
     <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="elegant-effects.css">
     <style>
-        /* 首頁專用樣式 */
-        .hero-section {
-            min-height: 70vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 60px 20px;
+        /* 商品頁面專用樣式 */
+        .products-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
 
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
+        /* 篩選側邊欄 */
+        .filter-sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .filter-sidebar h2 {
+            font-size: 1.3rem;
             color: #3d2817;
             margin-bottom: 20px;
-            line-height: 1.2;
         }
 
-        .hero-subtitle {
-            font-size: 1.5rem;
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-section h3 {
+            font-size: 0.95rem;
             color: #6F4E37;
-            margin-bottom: 40px;
-            font-weight: 300;
-        }
-
-        .hero-description {
-            max-width: 600px;
-            font-size: 1.1rem;
-            color: #5a5a5a;
-            line-height: 1.8;
-            margin-bottom: 50px;
-        }
-
-        .cta-button {
-            background: #6F4E37;
-            color: white;
-            padding: 18px 48px;
-            font-size: 1.2rem;
+            margin-bottom: 12px;
             font-weight: 600;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 16px rgba(111, 78, 55, 0.3);
-            text-decoration: none;
-            display: inline-block;
         }
 
-        .cta-button:hover {
-            background: #5a3d2a;
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(111, 78, 55, 0.4);
-        }
-
-        .about-section {
-            padding: 80px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-            margin-top: 60px;
-        }
-
-        .about-card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        .filter-search,
+        .filter-select,
+        .filter-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e8dfd5;
+            border-radius: 8px;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
-        .about-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(111, 78, 55, 0.15);
+        .filter-search:focus,
+        .filter-select:focus,
+        .filter-input:focus {
+            border-color: #6F4E37;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(111, 78, 55, 0.1);
         }
 
-        .about-card-icon {
-            font-size: 3rem;
+        .price-range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-range-inputs input {
+            flex: 1;
+        }
+
+        .price-range-inputs span {
+            color: #999;
+        }
+
+        .filter-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .apply-filter-btn,
+        .reset-filter-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .apply-filter-btn {
+            background: #6F4E37;
+            color: white;
+        }
+
+        .apply-filter-btn:hover {
+            background: #5a3d2a;
+        }
+
+        .reset-filter-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .reset-filter-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* 商品展示區域 */
+        .products-main {
+            min-height: 60vh;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .products-header h2 {
+            font-size: 2rem;
+            color: #3d2817;
+        }
+
+        #product-count {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .no-products p {
+            font-size: 1.2rem;
+            color: #999;
             margin-bottom: 20px;
         }
 
-        .about-card h3 {
-            font-size: 1.4rem;
-            color: #3d2817;
-            margin-bottom: 15px;
-        }
-
-        .about-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
+        /* 響應式設計 */
+        @media (max-width: 968px) {
+            .products-container {
+                grid-template-columns: 1fr;
             }
 
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .hero-description {
-                font-size: 1rem;
-            }
-
-            .cta-button {
-                padding: 14px 36px;
-                font-size: 1rem;
+            .filter-sidebar {
+                position: static;
             }
         }
     </style>
@@ -133,41 +172,28 @@
         </div>
     </header>
 
-    <main>
-        <!-- Hero 區塊 -->
-        <section class="hero-section">
-            <h1 class="hero-title">品味每一顆咖啡豆的故事</h1>
-            <p class="hero-subtitle">精選世界各地的優質熟豆，為您帶來完美咖啡體驗</p>
-            <p class="hero-description">
-                我們堅持選用最優質的咖啡生豆，經過精心烘焙，<br>
-                將每一顆豆子的獨特風味完美呈現。<br>
-                從產地到您的杯中，我們用心對待每一個環節。
-            </p>
-            <a href="products.html" class="cta-button">開始選購 →</a>
-        </section>
+    <main class="container">
+        <div class="products-container">
+            <!-- 篩選側邊欄 -->
+            <aside class="filter-sidebar">
+                <h2>🔍 篩選商品</h2>
+                <div id="product-filters">
+                    <!-- 篩選器會由 product-filter.js 生成 -->
+                </div>
+            </aside>
 
-        <!-- 關於我們區塊 -->
-        <section class="about-section">
-            <div class="about-grid">
-                <div class="about-card">
-                    <div class="about-card-icon">🌍</div>
-                    <h3>嚴選產地</h3>
-                    <p>與信譽優良的生豆商合作，由專業團隊嚴格挑選與品質控管，確保每一批咖啡豆都符合高品質標準。</p>
+            <!-- 商品展示區域 -->
+            <div class="products-main">
+                <div class="products-header">
+                    <h2>精選咖啡豆</h2>
+                    <span id="product-count">載入中...</span>
                 </div>
 
-                <div class="about-card">
-                    <div class="about-card-icon">🔥</div>
-                    <h3>專業烘焙</h3>
-                    <p>由經驗豐富的烘豆師掌握火候，針對不同產地與品種，調整最適合的烘焙曲線。</p>
-                </div>
-
-                <div class="about-card">
-                    <div class="about-card-icon">📦</div>
-                    <h3>新鮮直送</h3>
-                    <p>堅持小批量烘焙，接單後才進行烘焙與包裝，確保您收到的每一包都是最新鮮的狀態。</p>
+                <div class="product-grid" id="product-grid">
+                    <!-- 商品卡片會由 product-filter.js 生成 -->
                 </div>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- 購物車側邊欄 -->
@@ -176,14 +202,10 @@
             <h2>購物車</h2>
             <button class="close-btn" onclick="toggleCart()">✕</button>
         </div>
-        <div class="cart-items" id="cart-items">
-            <!-- 購物車項目 -->
-        </div>
+        <div class="cart-items" id="cart-items"></div>
 
-        <!-- 購物車推薦 -->
         <div id="cart-recommendations" style="display:none;"></div>
 
-        <!-- 優惠券區 -->
         <div class="cart-coupon">
             <input type="text" id="coupon-code" placeholder="輸入優惠券代碼">
             <button onclick="applyCoupon()" class="apply-coupon-btn">套用</button>
@@ -230,13 +252,11 @@
                     <textarea id="customer-note" rows="2"></textarea>
                 </div>
 
-                <!-- 付款方式選擇 -->
                 <div class="form-group">
                     <label>付款方式 *</label>
                     <div id="payment-methods"></div>
                 </div>
 
-                <!-- 驗證碼 -->
                 <div class="form-group captcha-group">
                     <label>安全驗證 *</label>
                     <div class="captcha-container">
@@ -332,7 +352,7 @@
         </div>
     </div>
 
-    <!-- 管理者面板 (保留完整) -->
+    <!-- 管理者面板 -->
     <div class="modal" id="admin-panel-modal">
         <div class="modal-content">
             <div class="admin-header-bar">
@@ -423,15 +443,17 @@
                         <small>請輸入圖片網址</small>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>120g 價格（NT$）*</label>
-                        <input type="number" id="new-product-price120" placeholder="350" required min="0">
+                <div class="form-group">
+                    <label>商品規格與價格 *</label>
+                    <div id="new-product-prices-container">
+                        <div class="price-row">
+                            <input type="text" placeholder="規格名稱（如：120g）" class="spec-name" required>
+                            <input type="number" placeholder="價格" class="spec-price" required min="0">
+                            <button type="button" class="remove-spec-btn" onclick="removeNewProductSpec(this)" style="display:none;">✕</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>260g 價格（NT$）*</label>
-                        <input type="number" id="new-product-price260" placeholder="680" required min="0">
-                    </div>
+                    <button type="button" class="add-spec-btn" onclick="addNewProductSpec()">+ 新增規格</button>
+                    <small>至少需要 1 種規格</small>
                 </div>
                 <div class="form-group">
                     <label>產地</label>
@@ -530,12 +552,12 @@
     <script src="order-tracking.js"></script>
     <script src="coupon.js"></script>
     <script src="payment.js"></script>
-    <script src="recommendations.js"></script>
     <script src="permission-system.js"></script>
     <script src="admin-system.js"></script>
     <script src="admin-management.js"></script>
     <script src="admin-panel.js"></script>
     <script src="site-config.js"></script>
+    <script src="product-filter.js"></script>
     <script src="common.js"></script>
 </body>
 </html>
