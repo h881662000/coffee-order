@@ -1,0 +1,571 @@
+/* 手機版優化樣式 */
+
+/* ============================================
+   1. 基礎設定
+   ============================================ */
+@media (max-width: 768px) {
+    body {
+        font-size: 16px; /* 防止 iOS 自動縮放 */
+        -webkit-text-size-adjust: 100%;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    /* ============================================
+       2. 導航列優化 - 漢堡選單
+       ============================================ */
+    header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        padding: 15px 0;
+    }
+
+    header .container {
+        flex-wrap: wrap;
+        position: relative;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+        flex: 1;
+    }
+
+    /* 漢堡選單按鈕 */
+    .mobile-menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: #6F4E37;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-menu-toggle:active {
+        transform: scale(0.95);
+    }
+
+    .hamburger-icon {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .hamburger-icon span {
+        width: 20px;
+        height: 2px;
+        background: white;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-menu-toggle.active .hamburger-icon span:nth-child(1) {
+        transform: rotate(45deg) translateY(6px);
+    }
+
+    .mobile-menu-toggle.active .hamburger-icon span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .mobile-menu-toggle.active .hamburger-icon span:nth-child(3) {
+        transform: rotate(-45deg) translateY(-6px);
+    }
+
+    /* 導航選單 */
+    .header-nav {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: none;
+        gap: 0;
+    }
+
+    .header-nav.mobile-active {
+        max-height: 100vh;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 15px 0;
+    }
+
+    .header-nav .nav-link {
+        width: 100%;
+        padding: 15px 20px;
+        border-radius: 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 16px;
+    }
+
+    .header-nav .nav-link.active {
+        background: #f8f5f2;
+        color: #6F4E37;
+        border-left: 4px solid #6F4E37;
+    }
+
+    .member-area {
+        width: 100%;
+        padding: 10px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .member-area .member-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        justify-content: center;
+    }
+
+    .member-dropdown {
+        position: static !important;
+    }
+
+    .member-dropdown-content {
+        position: static !important;
+        display: none;
+        background: #f8f5f2;
+        box-shadow: none;
+        padding: 10px 0;
+    }
+
+    .member-dropdown-content.mobile-show {
+        display: block !important;
+    }
+
+    .member-dropdown-content a {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+
+    .cart-icon {
+        width: 100%;
+        padding: 15px 20px;
+        justify-content: center;
+        font-size: 16px;
+        background: #6F4E37;
+        color: white;
+        border-radius: 8px;
+        margin: 10px 20px;
+        width: calc(100% - 40px);
+    }
+
+    /* 為固定導航騰出空間 */
+    main {
+        margin-top: 80px;
+        padding-top: 20px;
+    }
+
+    /* ============================================
+       3. 商品卡片優化
+       ============================================ */
+    .product-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+        padding: 0 10px;
+    }
+
+    .product-card {
+        padding: 20px;
+    }
+
+    .product-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+    }
+
+    .product-image {
+        height: 200px;
+        margin-bottom: 15px;
+    }
+
+    .product-description,
+    .product-origin,
+    .product-roast,
+    .product-flavor {
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    /* 價格選項優化 - 更大的觸控區域 */
+    .product-prices {
+        margin: 15px 0;
+        padding: 10px;
+    }
+
+    .price-option {
+        padding: 15px;
+        min-height: 50px;
+        font-size: 15px;
+    }
+
+    .price-option .weight {
+        font-size: 15px;
+    }
+
+    .price-option .price {
+        font-size: 17px;
+    }
+
+    /* ============================================
+       4. 按鈕優化 - 更大的觸控目標
+       ============================================ */
+    .add-to-cart-btn,
+    .submit-btn,
+    .cta-button {
+        min-height: 50px;
+        font-size: 16px;
+        padding: 15px 20px;
+        touch-action: manipulation; /* 防止雙擊縮放 */
+    }
+
+    .add-to-cart-btn:active,
+    .submit-btn:active,
+    .cta-button:active {
+        transform: scale(0.98);
+    }
+
+    /* ============================================
+       5. 篩選側邊欄優化
+       ============================================ */
+    .products-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-sidebar {
+        width: 100%;
+        position: sticky;
+        top: 80px;
+        z-index: 100;
+        background: white;
+        border-radius: 0;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-sidebar h2 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    .filter-section {
+        margin-bottom: 15px;
+    }
+
+    .filter-section h3 {
+        font-size: 1rem;
+    }
+
+    .filter-select,
+    .filter-search {
+        font-size: 16px; /* 防止 iOS 縮放 */
+        padding: 12px;
+        min-height: 44px;
+    }
+
+    /* ============================================
+       6. 模態視窗優化
+       ============================================ */
+    .modal {
+        padding: 0;
+    }
+
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        padding: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .close-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+
+    /* ============================================
+       7. 表單優化
+       ============================================ */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        font-size: 16px !important; /* 防止 iOS 縮放 */
+        padding: 14px;
+        min-height: 48px;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+    }
+
+    /* ============================================
+       8. 購物車側邊欄優化
+       ============================================ */
+    .cart-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        right: -100%;
+    }
+
+    .cart-sidebar.active {
+        right: 0;
+    }
+
+    .cart-header {
+        padding: 20px;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+
+    .cart-content {
+        padding: 15px;
+    }
+
+    .cart-item {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .cart-item-details h4 {
+        font-size: 1.1rem;
+    }
+
+    .cart-footer {
+        padding: 20px;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ============================================
+       9. 首頁優化
+       ============================================ */
+    .hero-section {
+        min-height: 50vh;
+        padding: 40px 20px;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        line-height: 1.3;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .about-card {
+        padding: 30px 20px;
+    }
+
+    /* ============================================
+       10. 管理面板優化
+       ============================================ */
+    .admin-panel-container {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #ecf0f1;
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-tab {
+        flex-shrink: 0;
+        padding: 15px 20px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+    }
+
+    .admin-tab.active {
+        border-left: none;
+        border-bottom-color: #3498db;
+    }
+
+    .admin-content {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .admin-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-table {
+        min-width: 600px;
+    }
+
+    /* ============================================
+       11. 價格規格管理優化
+       ============================================ */
+    .price-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .remove-spec-btn {
+        width: 100%;
+        height: 44px;
+    }
+
+    /* ============================================
+       12. 訂單查詢優化
+       ============================================ */
+    .search-container {
+        padding: 20px 15px;
+    }
+
+    .search-result {
+        padding: 15px;
+    }
+
+    .order-details {
+        font-size: 14px;
+    }
+
+    /* ============================================
+       13. 會員資料頁面優化
+       ============================================ */
+    .profile-container {
+        padding: 15px;
+    }
+
+    .profile-card {
+        padding: 20px;
+    }
+
+    /* ============================================
+       14. 觸控友善的間距
+       ============================================ */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+        -webkit-tap-highlight-color: rgba(111, 78, 55, 0.2);
+    }
+
+    /* ============================================
+       15. 下拉選單優化
+       ============================================ */
+    .member-dropdown:hover .member-dropdown-content {
+        display: none; /* 在手機上禁用 hover */
+    }
+
+    .member-dropdown.mobile-active .member-dropdown-content {
+        display: block !important;
+    }
+}
+
+/* ============================================
+   16. 超小螢幕優化 (iPhone SE, etc.)
+   ============================================ */
+@media (max-width: 375px) {
+    header h1 {
+        font-size: 1.1rem;
+    }
+
+    .hero-title {
+        font-size: 1.7rem;
+    }
+
+    .product-card {
+        padding: 15px;
+    }
+
+    .price-option {
+        padding: 12px;
+    }
+}
+
+/* ============================================
+   17. 平板橫向優化
+   ============================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .about-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================
+   18. 改善滾動性能
+   ============================================ */
+@media (max-width: 768px) {
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 隱藏桌面才需要的元素 */
+    .desktop-only {
+        display: none !important;
+    }
+}

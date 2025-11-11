@@ -19,7 +19,16 @@ const Navigation = {
 
         header.innerHTML = `
             <h1 id="site-title" style="cursor: pointer;" onclick="window.location.href='index.html'">☕ DiDo咖啡</h1>
-            <nav class="header-nav">
+
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" style="display: none;">
+                <div class="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+
+            <nav class="header-nav" id="mobile-nav">
                 <a href="index.html" class="nav-link ${currentPage === 'index' ? 'active' : ''}">首頁</a>
                 <a href="products.html" class="nav-link ${currentPage === 'products' ? 'active' : ''}">商品</a>
                 <a href="my-orders.html" class="nav-link ${currentPage === 'my-orders' ? 'active' : ''}">我的訂單</a>
@@ -169,3 +178,82 @@ window.adminLogout = () => {
         window.location.href = 'index.html';
     }
 };
+
+// 手機版功能
+// 切換手機選單
+window.toggleMobileMenu = function() {
+    const nav = document.getElementById('mobile-nav');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+
+    if (nav && toggle) {
+        nav.classList.toggle('mobile-active');
+        toggle.classList.toggle('active');
+
+        // 關閉時也關閉會員下拉選單
+        if (!nav.classList.contains('mobile-active')) {
+            const dropdown = document.querySelector('.member-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('mobile-active');
+            }
+        }
+    }
+};
+
+// 點擊導航連結時關閉選單
+document.addEventListener('click', function(e) {
+    const nav = document.getElementById('mobile-nav');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+
+    // 點擊導航連結時關閉選單
+    if (e.target.classList.contains('nav-link')) {
+        if (nav) nav.classList.remove('mobile-active');
+        if (toggle) toggle.classList.remove('active');
+    }
+});
+
+// 修改會員下拉選單，在手機上點擊切換
+document.addEventListener('DOMContentLoaded', function() {
+    // 監聽會員按鈕點擊
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('member-btn') && window.innerWidth <= 768) {
+            const dropdown = e.target.closest('.member-dropdown');
+            if (dropdown) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // 切換下拉選單
+                dropdown.classList.toggle('mobile-active');
+                const content = dropdown.querySelector('.member-dropdown-content');
+                if (content) {
+                    content.classList.toggle('mobile-show');
+                }
+            }
+        }
+    });
+
+    // 點擊下拉選單項目後關閉
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.member-dropdown-content a')) {
+            const nav = document.getElementById('mobile-nav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const dropdown = document.querySelector('.member-dropdown');
+
+            if (nav) nav.classList.remove('mobile-active');
+            if (toggle) toggle.classList.remove('active');
+            if (dropdown) dropdown.classList.remove('mobile-active');
+        }
+    });
+});
+
+// 視窗大小改變時重置選單
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+        const nav = document.getElementById('mobile-nav');
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        const dropdown = document.querySelector('.member-dropdown');
+
+        if (nav) nav.classList.remove('mobile-active');
+        if (toggle) toggle.classList.remove('active');
+        if (dropdown) dropdown.classList.remove('mobile-active');
+    }
+});
